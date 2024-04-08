@@ -1,0 +1,6 @@
+CUSTOM:scripts/advanced_slavery/slave.lua
+CUSTOM:scripts/advanced_slavery/slaver.lua
+GLOBAL:scripts/advanced_slavery/slave_global.lua
+NPC:scripts/advanced_slavery/normal_npc.lua
+PLAYER:scripts/advanced_slavery/slave_player.lua    
+MISC_ITEM:scripts/advanced_slavery/slave_miscItem.lua
