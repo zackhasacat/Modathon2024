@@ -125,7 +125,8 @@ end
 local function onInit(data)
     if (data) then
         types.Actor.stats.level(self).current = 870
-
+        types.Actor.stats.dynamic.fatigue(self).current = types.Actor.stats.dynamic.fatigue(self).base
+        types.Actor.stats.ai.fight(self).base = 0
         if data.newBracer then
             equipBracer()
         end
@@ -133,6 +134,7 @@ local function onInit(data)
         self:activateBy(getPlayer())
     end
 end
+
 
 return {
     interfaceName  = "SlaveScript",
@@ -155,6 +157,7 @@ return {
     eventHandlers  = {
         onLoadEvent = onLoadEvent,
         equipBracer = equipBracer,
+        slaveMenuOptionClicked = slaveMenuOptionClicked,
         setEquipment = setEquipment,
         setBadItems = setBadItems,
         equipItems = equipItems,

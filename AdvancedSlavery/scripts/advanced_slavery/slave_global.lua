@@ -31,12 +31,12 @@ local function transferInventoriesEvent(data)
   transferInventories(data.fromInv, data.toInv)
 end
 local function slaveCanBeBought(actor)
-if not world.mwscript.getLocalScript(actor) then
-  return false
-end
+  if not world.mwscript.getLocalScript(actor) then
+    return false
+  end
 
   local val = world.mwscript.getLocalScript(actor).variables.slavestatus
-  
+
   if not val then return false end
   if actor.cell.name == "Suran, Slave Market" then
     return true
@@ -55,19 +55,32 @@ local function createMisc(name)
   local item = world.createObject(record.id, 1)
   return item
 end
-local function makeSlave(npc)
+local function makeSlave(npc, bracerId)
+
   if (npc:hasScript(SlaveScript) == false) then
     local NPCKey = createMisc("Key to " .. types.NPC.record(npc).name .. "'s slave bracer")
     NPCKey:moveInto(world.players[1])
-    local bracerCount1 = types.Actor.inventory(npc):countOf("slave_bracer_left")
-    local bracerCount2 = types.Actor.inventory(npc):countOf("slave_bracer_right")
     local newBracer
-    if bracerCount1 + bracerCount2 == 0 then
-      newBracer = world.createObject("slave_bracer_left")
+    if not bracerId then
+      local bracerCount1 = types.Actor.inventory(npc):countOf("slave_bracer_left")
+      local bracerCount2 = types.Actor.inventory(npc):countOf("slave_bracer_right")
+
+      if bracerCount1 + bracerCount2 == 0 then
+        newBracer = world.createObject("slave_bracer_left")
+        newBracer:moveInto(npc)
+      end
+    else
+      newBracer = types.Actor.inventory(world.players[1]):find(bracerId)
+      if newBracer.count > 1 then
+        newBracer = newBracer:split(1)
+      end
       newBracer:moveInto(npc)
     end
     npc:addScript(SlaveScript, { newBracer = newBracer })
   end
+end
+local function makeSlaveEvent(data)
+  makeSlave(data.npc, data.bracerId)
 end
 local spokenToActor
 local function onItemActive(item)
@@ -78,7 +91,7 @@ local function onItemActive(item)
       --companion share
       world.players[1]:sendEvent("AS_compshare", spokenToActor)
       async:newUnsavableSimulationTimer(0.1, function()
-       spokenToActor:sendEvent("equipBracer")
+        spokenToActor:sendEvent("equipBracer")
       end)
     end
 
@@ -89,23 +102,30 @@ local function checkSlave(actor)
   if world.mwscript.getLocalScript(actor) then
     local val = world.mwscript.getLocalScript(actor).variables.slavestatus
     if val and val == 2 and not actor:hasScript(SlaveScript) then
-makeSlave(actor)
+      makeSlave(actor)
     end
   end
 end
+local useMountMenu = true
 local function activateNPC(actor, player)
   if actor:hasScript(SlaveScript) then
     spokenToActor = actor
     world.mwscript.getGlobalVariables(player).zhac_talkingtoslave = 1
+
     async:newUnsavableSimulationTimer(0.1, function()
       world.mwscript.getGlobalVariables(player).zhac_talkingtoslave = 0
     end)
+    if useMountMenu then
+      player:sendEvent("activateSlave", actor)
+      return false
+    end
   else
     async:newUnsavableSimulationTimer(0.1, function()
       checkSlave(actor)
     end)
   end
 end
+
 
 I.Activation.addHandlerForType(types.NPC, activateNPC)
 return {
@@ -138,5 +158,6 @@ return {
     findRecordByName = findRecordByName,
     showDisabled = showDisabled,
     makeSlave = makeSlave,
+    makeSlaveEvent = makeSlaveEvent
   },
 }

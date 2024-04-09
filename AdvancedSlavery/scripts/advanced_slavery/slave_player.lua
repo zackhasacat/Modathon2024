@@ -12,6 +12,8 @@ local async = require("openmw.async")
 local input = require("openmw.input")
 local camera = require("openmw.camera")
 
+local slaveMenu = require("scripts.advanced_slavery.mount_menu")
+
 local cameraTarget = self
 
 local function getPositionBehind(obj)
@@ -42,6 +44,38 @@ local function setCameraTarget(target)
     end
     cameraTarget = target
 end
+local menuOpen = false
+local currSlave
+local function activateSlave(slave)
+    currSlave = slave
+    slaveMenu.showMessageBox(slave,true)
+    menuOpen = true
+end
+
+
+local function slaveMenuOptionClicked(text)
+
+if text == "Companion Share" then
+    I.UI.setMode(I.UI.MODE.Companion, { target = currSlave })
+elseif text == "Speak to" then
+
+    I.UI.setMode(I.UI.MODE.Dialogue, { target = currSlave })
+elseif text == "Follow" then
+    currSlave:sendEvent('StartAIPackage', {type='Follow', target=self.object})
+elseif text == "Wait" then
+    currSlave:sendEvent('StartAIPackage', {type='Wander'})
+elseif text == "Wander" then
+    currSlave:sendEvent('StartAIPackage', {type='Wander',distance = 1000})
+end
+
+menuOpen = false
+end
+local function onKeyPress(key)
+    if menuOpen then
+        slaveMenu.keyPress(key)
+        return
+    end
+end
 
 return {
     interfaceName  = "SlaveScript",
@@ -55,7 +89,7 @@ return {
         onLoad = onLoad,
         onSave = onSave,
         onUpdate = onUpdate,
-        onInactive = onInactive,
+        onKeyPress = onKeyPress,
     },
     eventHandlers  = {
         AS_compshare = function (npc)
@@ -68,5 +102,7 @@ return {
         equipItems = equipItems,
         findValidPlants = findValidPlants,
         findNextPlant = findNextPlant,
+        activateSlave = activateSlave,
+        slaveMenuOptionClicked = slaveMenuOptionClicked,
     }
 }
