@@ -21,3 +21,9 @@ Slaves will get the effects the player has, such as levitate, walterwalking.
 Slaves will consume potions as needed, unless requested not to.
 
 Downed NPCs can be made into slaves if you have a free slave bracer.
+
+TODO:
+
+MWSE mechanic
+Claim existing slaves
+Purchase at market system
