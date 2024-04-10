@@ -1,11 +1,11 @@
 local isOpenMW, I = pcall(require,"openmw.interfaces")
 
-local util = pcall(require,"openmw.util")
-local core = pcall(require,"openmw.core")
-local types = pcall(require,"openmw.types")
-local storage = pcall(require,"openmw.storage")
+local _,util = pcall(require,"openmw.util")
+local _,core = pcall(require,"openmw.core")
+local _,types = pcall(require,"openmw.types")
+local _,storage = pcall(require,"openmw.storage")
 local world = pcall(require,"openmw.world")
-local async = pcall(require,"openmw.async")
+local _,async = pcall(require,"openmw.async")
 
 
 local timeDelay = 0.01
@@ -17,7 +17,6 @@ local coinAscent = true
 local coinOriginZPos
 math.randomseed(os.time())
 
-local isOpenMW = false-- tes3 ~= nil
 local function getPosition(x, y, z)
     if isOpenMW then
         return util.vector3(x, y, z)
@@ -47,8 +46,10 @@ local function runWithDelay(delay, func)
     end
 end
 local function getRotation(x, y, z)
+
+    --TODO: account for z rotation so it faces the player still
     if isOpenMW then
-        local rot = util.transform.rotateY(math.rad(coinRot))
+        local rot = util.transform.rotateY(y)
         return rot
     else
        return tes3vector3.new(x,(y),z)
