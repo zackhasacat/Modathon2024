@@ -26,7 +26,7 @@ local function onUpdate(dt)
     end
     if doorOpening then
         local completion = anim.getCurrentTime(doorObj, "idle1")
-        if completion > 12 then 
+        if completion and completion > 12 then 
             core.sound.playSound3d("thunderclap",doorObj)
             doorClosing = false
         end
