@@ -1,2 +1,3 @@
 ACTIVATOR:scripts/MorroVault/doorController.lua
 GLOBAL:scripts/MorroVault/MorroVault_g.lua
+GLOBAL:scripts/MorroVault/TeleportBlocker.lua
