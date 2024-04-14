@@ -73,7 +73,7 @@ local function onUpdate(dt)
         end
     end
     if doorOpening then
-        local completion = anim.getCurrentTime(doorObj, "idle1")
+        local completion = anim.getCurrentTime(doorObj, "idle1h")
         if completion then
             if completion > 6.6 then
                 doorOpening = false
