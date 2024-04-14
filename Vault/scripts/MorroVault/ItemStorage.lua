@@ -10,7 +10,7 @@ local storedEquip = {}
 local storedEquip2 = {}
 
 local function getStorageContainer()
-    local cellList = world.getCellByName("Andelor Ancestral Tomb"):getAll(types.Container)
+    local cellList = world.getCellByName("Resdaynia Sanctuary, Entrance"):getAll(types.Container)
     for index, value in ipairs(cellList) do
         if value.recordId == "zhac_bchest_outside" then
             return value
@@ -18,7 +18,7 @@ local function getStorageContainer()
     end
 end
 local function getStorageContainer2()
-    local cellList = world.getCellByName("Andelor Ancestral Tomb"):getAll(types.Container)
+    local cellList = world.getCellByName("Resdaynia Sanctuary, Entrance"):getAll(types.Container)
     for index, value in ipairs(cellList) do
         if value.recordId == "zhac_bchest_inside" then
             return value
