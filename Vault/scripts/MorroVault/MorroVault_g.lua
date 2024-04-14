@@ -14,6 +14,7 @@ local playerIsInVault = false
 local checkForExit = false
 local cutsceneState = 0
 local openDelay = 2
+local openSoundStage = 0
 local doorObj
 local function getObjByID(id, cell)
     if not cell then
@@ -29,17 +30,21 @@ local function openDoor()
     doorOpening = true
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
     async:newUnsavableSimulationTimer(openDelay, function()
-        world.mwscript.getGlobalVariables(actor).zhac_doorstate = 1
+        world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 1
+        core.sound.playSound3d("Door Stone Open", doorObj, { volume = 5 })
     end
     )
 
     playerIsInVault = world.players[1].position.x > 11318
     checkForExit = true
+    openSoundStage = 0
 end
 local function closeDoor()
-    world.mwscript.getGlobalVariables(actor).zhac_doorstate = 0
+    world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 0
     doorClosing = true
+    openSoundStage = 0
 end
+local secsPassed = 0
 local function onUpdate(dt)
     if not doorObj then
         for index, value in ipairs(world.players[1].cell:getAll(types.Activator)) do
@@ -53,23 +58,51 @@ local function onUpdate(dt)
         if completion and completion > 12 then
             core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
             doorClosing = false
+        elseif completion then
+
+            if openSoundStage == 0 and completion > 7.4 then
+                core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                openSoundStage = 1
+            elseif openSoundStage == 1 and completion > 8 then
+                core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                openSoundStage = 2
+            elseif openSoundStage == 2 and completion > 9 then
+                core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                openSoundStage = 3
+            end
         end
     end
     if doorOpening then
         local completion = anim.getCurrentTime(doorObj, "idle1")
-        if completion and completion > 6.6 then
-            doorOpening = false
+        if completion then
+            if completion > 6.6 then
+                doorOpening = false
 
-            if types.Player.quests(world.players[1]).zhac_vault1.stage < 41 then
-                if cutsceneState == 1 then
-                    cutsceneState = 2
-                    local center, right, left = getObjByID("zhac_mvault_rguard_c"), getObjByID("zhac_mvault_lguard"),
-                        getObjByID("zhac_mvault_rguard")
-                    center:sendEvent("exitVaultCenter")
-                    async:newUnsavableSimulationTimer(2, function()
-                        left:sendEvent("exitVaultLeft")
-                        right:sendEvent("exitVaultRight")
-                    end)
+                if types.Player.quests(world.players[1]).zhac_vault1.stage < 41 then
+                    if cutsceneState == 1 then
+                        cutsceneState = 2
+                        local center, right, left = getObjByID("zhac_mvault_rguard_c"), getObjByID("zhac_mvault_lguard"),
+                            getObjByID("zhac_mvault_rguard")
+                        center:sendEvent("exitVaultCenter")
+                        async:newUnsavableSimulationTimer(2, function()
+                            left:sendEvent("exitVaultLeft")
+                            right:sendEvent("exitVaultRight")
+                        end)
+                    end
+                end
+            else
+                if openSoundStage == 0 and completion > 2.1 then
+                    core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                    openSoundStage = 1
+                elseif openSoundStage == 1 and completion > 3.4 then
+                    core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                    openSoundStage = 2
+                elseif openSoundStage == 2 and completion > 3.9 then
+                    core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                    openSoundStage = 3
+                elseif openSoundStage == 3 and completion > 4.6 then
+                    core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
+                    openSoundStage = 4
                 end
             end
         end
