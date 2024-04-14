@@ -16,7 +16,7 @@ local cutsceneState = 0
 
 local function doorOpen()
     anim.clearAnimationQueue(self, true)
-    anim.playQueued(self, "idle1h",{})
+    anim.playQueued(self, "death2",{})
 
 end
 local function doorClose()
