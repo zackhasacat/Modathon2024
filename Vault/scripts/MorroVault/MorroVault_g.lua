@@ -140,7 +140,7 @@ I.Activation.addHandlerForType(types.NPC, function(obj, actor)
     end
 end)
 local function goToVault()
-    world.players[1]:teleport("Andelor Ancestral Tomb", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
+    world.players[1]:teleport("Resdaynia Sanctuary, Entrance", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
 end
 local function StartCutscene1() --make the NPCs come out
     if types.Player.quests(world.players[1]).zhac_vault1.stage < 41 then
@@ -158,7 +158,7 @@ local function firstApproach()
     end
 end
 local function onPlayerAdded()
-    world.players[1]:teleport("Andelor Ancestral Tomb", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
+    world.players[1]:teleport("Resdaynia Sanctuary, Entrance", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
 end
 local checkinCOunt = 0
 local function checkInWhenDone(id)

@@ -1,6 +1,8 @@
 ACTIVATOR:scripts/MorroVault/doorController.lua
 GLOBAL:scripts/MorroVault/MorroVault_g.lua
+PLAYER:scripts/MorroVault/MorroVault_p.lua
 GLOBAL:scripts/MorroVault/TeleportBlocker.lua
 GLOBAL:scripts/MorroVault/ItemStorage.lua
+GLOBAL:scripts/MorroVault/Librarian.lua
 PLAYER:scripts/MorroVault/ItemStorage_P.lua
 NPC:scripts/MorroVault/AITravel.lua

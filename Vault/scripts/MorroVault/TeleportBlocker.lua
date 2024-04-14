@@ -15,7 +15,7 @@ local function startsWith(inputString, startString)
 end
 
 local function canTeleportInCell(cell)
-    if startsWith(cell.name, "Resdaynia Sanctuary") or (cell.name == "Andelor Ancestral Tomb" and player.position.x > 11318) then
+    if startsWith(cell.name, "Resdaynia Sanctuary") or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
         types.Player.setTeleportingEnabled(player,false)
         wasInRes = true
     else
@@ -37,7 +37,7 @@ local function onUpdate()
         end
         player = world.players[1]
     end
-    if player.cell.name == "Andelor Ancestral Tomb" then
+    if player.cell.name == "Resdaynia Sanctuary, Entrance" then
         if roomState ~= 1 and player.position.x > 11318 then
             roomState = 1
             canTeleportInCell(player.cell)
