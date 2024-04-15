@@ -31,7 +31,10 @@ local function openDoor()
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
     async:newUnsavableSimulationTimer(openDelay, function()
         world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 1
-        core.sound.playSound3d("Door Stone Open", doorObj, { volume = 5 })
+        async:newUnsavableSimulationTimer(0.5, function()
+            core.sound.playSound3d("Door Stone Open", doorObj, { volume = 5 })
+        end
+        )
     end
     )
 
@@ -59,7 +62,6 @@ local function onUpdate(dt)
             core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
             doorClosing = false
         elseif completion then
-
             if openSoundStage == 0 and completion > 7.4 then
                 core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
                 openSoundStage = 1
@@ -119,7 +121,7 @@ local function onUpdate(dt)
 end
 --zhac_carryingitems
 I.Activation.addHandlerForType(types.Activator, function(obj, actor)
-    if obj.recordId == "zhac_door_button" or obj.recordId == "ab_furn_shrinemephala_a" then
+    if obj.recordId == "zhac_door_button" then--or obj.recordId == "ab_furn_shrinemephala_a" then
         if world.mwscript.getGlobalVariables(actor).zhac_doorstate == 0 then
             openDoor()
         else
@@ -140,7 +142,8 @@ I.Activation.addHandlerForType(types.NPC, function(obj, actor)
     end
 end)
 local function goToVault()
-    world.players[1]:teleport("Resdaynia Sanctuary, Entrance", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
+    world.players[1]:teleport("Resdaynia Sanctuary, Entrance",
+        util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
 end
 local function StartCutscene1() --make the NPCs come out
     if types.Player.quests(world.players[1]).zhac_vault1.stage < 41 then
@@ -153,12 +156,13 @@ local function StartCutscene1() --make the NPCs come out
     end
 end
 local function firstApproach()
-    if types.Player.quests(world.players[1]).zhac_vault1.stage < 20 and types.Player.quests(world.players[1]).zhac_vault1.stage < 20 then
+    if types.Player.quests(world.players[1]).zhac_vault1.stage > 0 and  types.Player.quests(world.players[1]).zhac_vault1.stage < 20 then
         types.Player.quests(world.players[1]).zhac_vault1:addJournalEntry(20)
     end
 end
 local function onPlayerAdded()
-    world.players[1]:teleport("Resdaynia Sanctuary, Entrance", util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
+    world.players[1]:teleport("Resdaynia Sanctuary, Entrance",
+        util.vector3(8861.6123046875, 4152.15234375, 11424.8330078125))
 end
 local checkinCOunt = 0
 local function checkInWhenDone(id)
