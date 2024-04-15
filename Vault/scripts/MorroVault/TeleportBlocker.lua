@@ -15,7 +15,7 @@ local function startsWith(inputString, startString)
 end
 
 local function canTeleportInCell(cell)
-    if startsWith(cell.name, "Resdaynia Sanctuary") or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
+    if (startsWith(cell.name, "Resdaynia Sanctuary")  and cell.name ~= "Resdaynia Sanctuary, Entrance")or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
         types.Player.setTeleportingEnabled(player,false)
         wasInRes = true
     else
