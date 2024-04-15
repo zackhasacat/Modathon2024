@@ -55,6 +55,8 @@ MECHANICS:
 
     Combat/Arena: A battleground, that would allow you to either have NPCs team up with each other, and play games/fake combat with each other. Some sort of capture the flag. Might also have the option to summon daedra to fight.
 
+    Wasteland: The player can choose to allow the apocolpyse to happen. This will make vvardenfell uninabitable. All(most?) human life on the island outside of the vault is removed. NPCs are removed, or replaced with corpus monsters. Buildings have their lightes removed/extinguised, items are removed randomly, tomb/cave/spooky sound markers are placed. Weather is forced to be blight in all regions.
+
 Possible Quests:
     Solve the murder of one of the vault residents
 
