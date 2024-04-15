@@ -4,5 +4,6 @@ PLAYER:scripts/MorroVault/MorroVault_p.lua
 GLOBAL:scripts/MorroVault/TeleportBlocker.lua
 GLOBAL:scripts/MorroVault/ItemStorage.lua
 GLOBAL:scripts/MorroVault/Librarian.lua
+GLOBAL:scripts/MorroVault/apoc.lua
 PLAYER:scripts/MorroVault/ItemStorage_P.lua
 NPC:scripts/MorroVault/AITravel.lua

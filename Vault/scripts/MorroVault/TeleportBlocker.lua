@@ -14,6 +14,14 @@ local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
 
+local function isInVault(obj)
+    if (startsWith(obj.cell.name, "Resdaynia Sanctuary") )then
+      return true
+    else
+     return false
+    end
+end
+
 local function canTeleportInCell(cell)
     if (startsWith(cell.name, "Resdaynia Sanctuary")  and cell.name ~= "Resdaynia Sanctuary, Entrance")or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
         types.Player.setTeleportingEnabled(player,false)
