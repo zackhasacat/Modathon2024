@@ -91,8 +91,8 @@ local function onUpdate()
         types.Player.setTeleportingEnabled(player, false)
         wasInRes = true
         if doorIsOpen then
-            doorIsOpen = false
             I.MorroVault.autoClose()
+            return
         end
     elseif player.cell.name == ENTRANCE and player.position.x <= POSITION_THRESHOLD and wasInRes then
         if not doorIsOpen then
@@ -100,10 +100,10 @@ local function onUpdate()
             return
         else
             if doorIsOpen then
-                doorIsOpen = false
                 I.MorroVault.autoClose()
             end
         end
+        
         types.Player.setTeleportingEnabled(player, true)
         wasInRes = false
     end

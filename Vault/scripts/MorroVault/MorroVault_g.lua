@@ -14,7 +14,7 @@ local playerIsInVault = false
 local checkForExit = false
 local cutsceneState = 0
 local openDelay = 2
-local closeDelay = 5
+local closeDelay = 15
 local openSoundStage = 0
 local doorObj
 local doorBlockerObj
