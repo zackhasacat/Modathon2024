@@ -28,6 +28,7 @@ local function getObjByID(id, cell)
 end
 local function openDoor()
     doorOpening = true
+    I.TeleportBlocker.setDoorOpen(true)
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
     async:newUnsavableSimulationTimer(openDelay, function()
         world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 1
@@ -43,6 +44,7 @@ local function openDoor()
     openSoundStage = 0
 end
 local function closeDoor()
+    I.TeleportBlocker.setDoorOpen(false)
     world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 0
     doorClosing = true
     openSoundStage = 0
@@ -121,7 +123,15 @@ local function onUpdate(dt)
 end
 --zhac_carryingitems
 I.Activation.addHandlerForType(types.Activator, function(obj, actor)
+
     if obj.recordId == "zhac_door_button" then--or obj.recordId == "ab_furn_shrinemephala_a" then
+        local itemCount = types.Actor.inventory(actor):countOf("zhac_vault_doorKey")
+        if itemCount < 1 then
+            if actor.type == types.Player then
+                actor:sendEvent("showPlayerMessage","You do not have the vault control index required to open the door.")
+            end
+            return
+        end
         if world.mwscript.getGlobalVariables(actor).zhac_doorstate == 0 then
             openDoor()
         else
@@ -167,13 +177,18 @@ local checkinCOunt = 0
 local function checkInWhenDone(id)
     checkinCOunt = checkinCOunt + 1
     if checkinCOunt > 1 then
-        world.mwscript.getGlobalVariables(actor).zhac_doorstate = 0
+       closeDoor()
         doorClosing = true
         checkinCOunt = -1
     end
 end
 return
 {
+    interfaceName = "MorroVault",
+    interface = {
+      openDoor = openDoor,
+      closeDoor = closeDoor
+    },
     engineHandlers = {
         onUpdate = onUpdate,
         onPlayerAdded = onPlayerAdded,

@@ -10,6 +10,10 @@ local lastCell
 local lastPos
 local blocked = false
 local wasInRes = false
+
+local doorIsOpen = false
+
+local antiCheese = true
 local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
@@ -21,9 +25,17 @@ local function isInVault(obj)
      return false
     end
 end
-
+local function kickPlayerOut()
+    player:teleport("Resdaynia Sanctuary, Entrance",util.vector3(9726.462890625, 4234.05419921875, 11393))
+end
 local function canTeleportInCell(cell)
     if (startsWith(cell.name, "Resdaynia Sanctuary")  and cell.name ~= "Resdaynia Sanctuary, Entrance")or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
+        if not wasInRes then
+        if not doorIsOpen and antiCheese then
+            kickPlayerOut()
+            return
+        end
+    end
         types.Player.setTeleportingEnabled(player,false)
         wasInRes = true
     else
@@ -62,7 +74,22 @@ local function onUpdate()
 end
 return
 {
+    interfaceName = "TeleportBlocker",
+    interface = {
+      setDoorOpen = function (state)
+        doorIsOpen = state
+      end
+    },
     engineHandlers = {
-        onUpdate = onUpdate
+        onUpdate = onUpdate,
+        onSave = function ()
+            return {wasInRes = wasInRes,doorIsOpen = doorIsOpen,}
+        end,
+        onLoad = function (data)
+            if data then
+                wasInRes = data.wasInRes
+                doorIsOpen = data.doorIsOpen
+            end
+        end
     }
 }

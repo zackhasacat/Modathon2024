@@ -17,7 +17,9 @@ Redoran Quarters: Architecture similar to the Redoran Council chambers.
     Fermeting section: To produce sujamma, other drinks
     Clothier
     Library
+
 Hlaalu Quarter: Number of hlaalu buildings inside of a building area.
+    Trader
 
 
 Temple: The heart of the vault, the temple here follows the reclemations. Many pray here, and healers assist with any injuries or sickness.

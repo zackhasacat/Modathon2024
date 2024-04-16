@@ -11,6 +11,9 @@ local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
 local itemBlacklist = {"a_siltstrider"}
+local creatureBlacklist = {
+    "ash_ghoul"
+}
 math.randomseed(os.time())
 local function isInVault(obj)
    return startsWith(obj.cell.name, "Resdaynia Sanctuary")
@@ -22,6 +25,13 @@ local function onActorActive(act)
     end
     local randomNumber = math.random(0, 100)
     processedActors[act.id] = true
+    if act.type == types.Creature then
+        for index, value in ipairs(creatureBlacklist) do
+            if value == act.recordId then
+                return
+            end
+        end
+    end
     if act.type == types.NPC then
 
         local race = types.NPC.record(act).race

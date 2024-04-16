@@ -1,0 +1,2 @@
+GLOBAL:scripts/ArrowStick/ArrowStick_G.lua
+PLAYER:scripts/ArrowStick/ArrowStick_P.lua
