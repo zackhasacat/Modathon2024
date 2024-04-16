@@ -33,7 +33,7 @@ local function setLightBlockersEnabled(state,cell)
         cell = world.players[1].cell
     end
     for index, value in ipairs(cell:getAll()) do
-        if value.recordId == "zhac_vault_lightblocker" then
+        if value.recordId == "zhac_vault_lightblocker" or value.recordId == "zhac_vault_sound_crys" then
            value.enabled= state
         end
     end
