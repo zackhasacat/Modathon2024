@@ -109,11 +109,6 @@ return {
     interface = {
         getArrowRotation = getArrowRotation,
     },
-    eventHandlers = {
-        showPlayerMessage = function(msg)
-            ui.showMessage(msg)
-        end
-    },
     engineHandlers = {
         onFrame = onFrame,
     }

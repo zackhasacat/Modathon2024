@@ -25,6 +25,9 @@ local function doorClose()
    -- anim.playQueued(self, "idle3")
 end
 local function onUpdate()
+    if self.recordId ~= "zhac_vault_door" then
+        return 
+    end
     local player = nearby.players[1]
     if not player then return end
     local dist = (self.position - player.position):length()

@@ -1,91 +1,135 @@
 local _, world = pcall(require, "openmw.world")
-local isOpenMW, I = pcall(require, "openmw.interfaces")
-
 local _, util = pcall(require, "openmw.util")
-local _, core = pcall(require, "openmw.core")
 local _, types = pcall(require, "openmw.types")
-local anim = require('openmw.animation')
+local _, I = pcall(require, "openmw.interfaces")
+
 local player
 local lastCell
 local lastPos
-local blocked = false
 local wasInRes = false
-
 local doorIsOpen = false
-
 local antiCheese = true
+local RESDAYNIA_SANCTUARY = "Resdaynia Sanctuary"
+local ENTRANCE = RESDAYNIA_SANCTUARY .. ", Entrance"
+local POSITION_THRESHOLD = 11318  -- Positional boundary to detect significant movement in or out of the vault entrance
+local VAULT_POSITION = util.vector3(9726.462890625, 4234.05419921875, 11393) -- Last safe position inside the vault
+
 local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
 
-local function isInVault(obj)
-    if (startsWith(obj.cell.name, "Resdaynia Sanctuary") )then
-      return true
-    else
-     return false
-    end
-end
 local function kickPlayerOut()
-    player:teleport("Resdaynia Sanctuary, Entrance",util.vector3(9726.462890625, 4234.05419921875, 11393))
+    player:teleport(ENTRANCE, VAULT_POSITION)
 end
-local function canTeleportInCell(cell)
-    if (startsWith(cell.name, "Resdaynia Sanctuary")  and cell.name ~= "Resdaynia Sanctuary, Entrance")or (cell.name == "Resdaynia Sanctuary, Entrance" and player.position.x > 11318) then
-        if not wasInRes then
-        if not doorIsOpen and antiCheese then
-            kickPlayerOut()
-            return
+local function bringPlayerBack()
+    player:teleport(lastCell, lastPos)
+end
+
+local function isInVault(actor)
+    local cellName = actor.cell.name
+    if cellName == ENTRANCE then
+        if player.position.x > POSITION_THRESHOLD then
+            return true
+        else
+            return false
         end
     end
-        types.Player.setTeleportingEnabled(player,false)
-        wasInRes = true
+    if startsWith(cellName, RESDAYNIA_SANCTUARY) then
+        return true
+    end
+end
+
+local function handleCellTransition(cell)
+    local cellName = cell.name
+
+    if isInVault(player) then
+        if not wasInRes then  -- Player just entered the vault legally or via noclip
+            if not doorIsOpen and antiCheese then  -- Handle unexpected entrance
+                kickPlayerOut()
+            else
+                types.Player.setTeleportingEnabled(player, false)
+                wasInRes = true
+            end
+        end
     else
-        if wasInRes then
-            types.Player.setTeleportingEnabled(player,true)
+        if wasInRes then  -- Player is leaving or has left the vault
+            types.Player.setTeleportingEnabled(player, true)
             wasInRes = false
         end
     end
 end
+
 local function onCellChange(newCell, oldCell)
-    print("New cell: " .. newCell.name)
-    canTeleportInCell(newCell)
+ --   print("New cell: " .. newCell.name .. " from old cell: " .. (oldCell and oldCell.name or "none"))
+    handleCellTransition(newCell)
+    lastCell = newCell
 end
-local roomState = 0
+
 local function onUpdate()
-    if not player then
-        if not world.players[1] then
-            return
-        end
+    if not player or not player.cell then
         player = world.players[1]
+        if not player then return end
     end
-    if player.cell.name == "Resdaynia Sanctuary, Entrance" then
-        if roomState ~= 1 and player.position.x > 11318 then
-            roomState = 1
-            canTeleportInCell(player.cell)
-        elseif roomState ~= 2 then
-            roomState = 2
-            canTeleportInCell(player.cell)
+
+    -- Additional checks for position to handle noclip or similar cheats
+    if isInVault(player) and not wasInRes then
+        -- If player suddenly appears in vault without proper transition
+        if not doorIsOpen and antiCheese then
+            kickPlayerOut()
+            return
+        else
+            types.Player.setTeleportingEnabled(player, false)
+            wasInRes = true
         end
+    elseif not isInVault(player) and wasInRes and player.cell.name ~= ENTRANCE then
+        bringPlayerBack()
+        return
     end
+
+    -- Check the player's position at the vault entrance against the threshold
+    if player.cell.name == ENTRANCE and player.position.x > POSITION_THRESHOLD and not wasInRes then
+        types.Player.setTeleportingEnabled(player, false)
+        wasInRes = true
+        if doorIsOpen then
+            doorIsOpen = false
+            I.MorroVault.autoClose()
+        end
+    elseif player.cell.name == ENTRANCE and player.position.x <= POSITION_THRESHOLD and wasInRes then
+        if not doorIsOpen then
+            bringPlayerBack()
+            return
+        else
+            if doorIsOpen then
+                doorIsOpen = false
+                I.MorroVault.autoClose()
+            end
+        end
+        types.Player.setTeleportingEnabled(player, true)
+        wasInRes = false
+    end
+
     if player.cell ~= lastCell then
         onCellChange(player.cell, lastCell)
-        lastCell = player.cell
     end
     lastPos = player.position
 end
-return
-{
+
+return {
     interfaceName = "TeleportBlocker",
     interface = {
-      setDoorOpen = function (state)
-        doorIsOpen = state
-      end
+        setDoorOpen = function(state)
+            doorIsOpen = state
+        end,
+        isInVault= function ()
+            return isInVault(player)
+        end
     },
     engineHandlers = {
         onUpdate = onUpdate,
-        onSave = function ()
-            return {wasInRes = wasInRes,doorIsOpen = doorIsOpen,}
+        onSave = function()
+            return { wasInRes = wasInRes, doorIsOpen = doorIsOpen }
         end,
-        onLoad = function (data)
+        onLoad = function(data)
             if data then
                 wasInRes = data.wasInRes
                 doorIsOpen = data.doorIsOpen

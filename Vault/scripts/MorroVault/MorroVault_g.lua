@@ -14,8 +14,10 @@ local playerIsInVault = false
 local checkForExit = false
 local cutsceneState = 0
 local openDelay = 2
+local closeDelay = 5
 local openSoundStage = 0
 local doorObj
+local doorBlockerObj
 local function getObjByID(id, cell)
     if not cell then
         cell = world.players[1].cell
@@ -28,6 +30,8 @@ local function getObjByID(id, cell)
 end
 local function openDoor()
     doorOpening = true
+    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4550)).enabled = false
+    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4549)).enabled = false
     I.TeleportBlocker.setDoorOpen(true)
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
     async:newUnsavableSimulationTimer(openDelay, function()
@@ -49,6 +53,18 @@ local function closeDoor()
     doorClosing = true
     openSoundStage = 0
 end
+local function finishDoorClose()
+    core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
+    doorClosing = false
+    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4550)).enabled = true
+    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4549)).enabled = true
+end
+local function autoClose()
+    async:newUnsavableSimulationTimer(closeDelay, function()
+  
+closeDoor()
+    end)
+end
 local secsPassed = 0
 local function onUpdate(dt)
     if not doorObj then
@@ -61,8 +77,8 @@ local function onUpdate(dt)
     if doorClosing then
         local completion = anim.getCurrentTime(doorObj, "death1")
         if completion and completion > 12 then
-            core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
-            doorClosing = false
+            finishDoorClose()
+            
         elseif completion then
             if openSoundStage == 0 and completion > 7.4 then
                 core.sound.playSound3d("AB_SteamHammerStrike", doorObj, { volume = 5 })
@@ -187,7 +203,8 @@ return
     interfaceName = "MorroVault",
     interface = {
       openDoor = openDoor,
-      closeDoor = closeDoor
+      closeDoor = closeDoor,
+      autoClose = autoClose,
     },
     engineHandlers = {
         onUpdate = onUpdate,
