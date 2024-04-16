@@ -14,6 +14,7 @@ local nearby = require('openmw.nearby')
 local debug = require('openmw.debug')
 local camera = require('openmw.camera')
 local Camera = require('openmw.camera')
+local rotOffset = 0
 local function anglesToV(pitch, yaw)
     local xzLen = math.cos(pitch)
     return util.vector3(xzLen * math.sin(yaw), -- x
@@ -40,9 +41,10 @@ local function getObjInCrosshairs(ignoreOb, mdist, alwaysPost, sourcePos) --Gets
     if (mdist ~= nil) then dist = mdist end
 
     local ret = nearby.castRenderingRay(pos, pos + v * dist, { ignore = self })
+    local ret2 = nearby.castRay(pos, pos + v * dist, { ignore = self })
     local destPos = (pos + v * dist)
 
-    return ret, destPos
+    return ret,ret2, destPos
 end
 local function createRotation(x, y, z)
     if (core.API_REVISION < 40) then
@@ -60,15 +62,18 @@ end
 local wasDrawing = false
 local function placeNewArrow(arrowId)
 
-    local xRot = camera.getPitch()
+    local xRot = camera.getPitch() - math.rad(rotOffset)
     local zRot = self.rotation:getAnglesZYX()
-    local cast = getObjInCrosshairs(self,nil,false,nil)
+    local cast, cast2 = getObjInCrosshairs(self,nil,false,nil)
     if not cast.hitPos then
         return
     end
     if cast.hitObject and (cast.hitObject.type == types.NPC or cast.hitObject.type == types.Creature) then
         return
     end
+    if cast2.hitObject and (cast2.hitObject.type == types.NPC or cast2.hitObject.type == types.Creature) then
+        return
+    end--Fired arrows will go through solid items, so need to check if it would have hit an NPC, otherwise you can get it stuck in a bottle, but still hit someone.
 
     local newRot = createRotation(xRot, 0, zRot)
     local newPos = cast.hitPos
@@ -84,8 +89,11 @@ local function onFrame(dt)
 
         local arrow = types.Actor.getEquipment(self)[types.Actor.EQUIPMENT_SLOT.Ammunition]
         if weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanBow then
+            rotOffset = 0
         elseif weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanCrossbow then
+            rotOffset = 0
         elseif weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanThrown then
+            rotOffset = 180
             arrow = weapon
         else
             return

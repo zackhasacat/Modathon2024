@@ -7,6 +7,10 @@ local _, types = pcall(require, "openmw.types")
 local _, async = pcall(require, "openmw.async")
 local anim = require('openmw.animation')
 
+
+if not core.contentFiles.has("evilsky.ESP") then
+    return {}
+end
 local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
@@ -14,6 +18,18 @@ local itemBlacklist = {"a_siltstrider"}
 local creatureBlacklist = {
     "ash_ghoul"
 }
+local function replaceWithActor(npc,newId,transferInv)
+    table.insert(creatureBlacklist,newId)
+    local newItem = world.createObject(newId)
+    newItem:teleport(npc.cell,npc.position,npc.rotation)
+    if transferInv then
+        for index, value in ipairs(types.Actor.inventory(npc):getAll()) do
+        value:moveInto(newItem)
+        end
+    end
+    npc:remove()
+ 
+end
 math.randomseed(os.time())
 local function isInVault(obj)
    return startsWith(obj.cell.name, "Resdaynia Sanctuary")
@@ -43,13 +59,21 @@ local function onActorActive(act)
             club:moveInto(act)
             act:sendEvent("makeAgressive")
             return
-        elseif randomNumber < 40 then
-            local newCreature = world.createObject("ash_ghoul")
-            newCreature:teleport(act.cell,act.position)
+        elseif randomNumber < 20 then
+            replaceWithActor(act,"ash_ghoul",true)
         elseif randomNumber < 30 then
             local newObj = world.createObject("Sound_Haunted00")
             newObj:teleport(act.cell,act.position)
+        else
+            if act.cell.isExterior then
+                act:remove()
+            else
+                replaceWithActor(act,"zhac_vault_skeleton",true)
+
+            end
+
         end
+        return
     end
     if not isInVault(act) then
         act:remove()
