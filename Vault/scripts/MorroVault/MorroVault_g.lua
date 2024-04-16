@@ -28,10 +28,19 @@ local function getObjByID(id, cell)
         end
     end
 end
+local function setLightBlockersEnabled(state,cell)
+    if not cell then
+        cell = world.players[1].cell
+    end
+    for index, value in ipairs(cell:getAll()) do
+        if value.recordId == "zhac_vault_lightblocker" then
+           value.enabled= state
+        end
+    end
+end
 local function openDoor()
     doorOpening = true
-    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4550)).enabled = false
-    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4549)).enabled = false
+    setLightBlockersEnabled(false)
     I.TeleportBlocker.setDoorOpen(true)
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
     async:newUnsavableSimulationTimer(openDelay, function()
@@ -56,8 +65,8 @@ end
 local function finishDoorClose()
     core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
     doorClosing = false
-    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4550)).enabled = true
-    world.getObjectByFormId(core.getFormId('Morrovault.esp', 4549)).enabled = true
+    
+    setLightBlockersEnabled(true)
 end
 local function autoClose()
     async:newUnsavableSimulationTimer(closeDelay, function()
