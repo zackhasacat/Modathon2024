@@ -14,7 +14,6 @@ local nearby = require('openmw.nearby')
 local debug = require('openmw.debug')
 local camera = require('openmw.camera')
 
-
 return {
 
     eventHandlers = {

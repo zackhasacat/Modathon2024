@@ -1,10 +1,9 @@
-local _, world = pcall(require, "openmw.world")
-local isOpenMW, I = pcall(require, "openmw.interfaces")
-
-local _, util = pcall(require, "openmw.util")
-local _, core = pcall(require, "openmw.core")
-local _, types = pcall(require, "openmw.types")
-local _, async = pcall(require, "openmw.async")
+local world = require("openmw.world")
+local I = require("openmw.interfaces")
+local util = require("openmw.util")
+local core = require("openmw.core")
+local types = require("openmw.types")
+local async = require("openmw.async")
 local anim = require('openmw.animation')
 local doorClosing = false
 
@@ -14,8 +13,11 @@ local playerIsInVault = false
 local checkForExit = false
 local cutsceneState = 0
 local openDelay = 2
-local closeDelay = 15
+local closeDelay = 5
 local openSoundStage = 0
+
+local playerEnteringVault = false
+local playerExitingVault = false
 local doorObj
 local doorBlockerObj
 local function getObjByID(id, cell)
@@ -28,6 +30,25 @@ local function getObjByID(id, cell)
         end
     end
 end
+local function getSafeToUnlock(cell)
+    if not cell then
+        cell = world.players[1].cell
+    end
+    local state1 = false
+    local state2 = false
+    for index, value in ipairs(cell:getAll()) do
+        if value.enabled then
+            if value.recordId == "zhac_vault_entrylight_2_r"  then
+                state2 = true
+             end
+             if value.recordId == "zhac_vault_entrylight_1_r"  then
+                state1 = true
+             end
+        end
+        
+    end
+    return state1 and state2
+end
 local function setLightBlockersEnabled(state,cell)
     if not cell then
         cell = world.players[1].cell
@@ -39,10 +60,20 @@ local function setLightBlockersEnabled(state,cell)
     end
 end
 local function openDoor()
+    if doorOpening then
+        return
+    end
     doorOpening = true
+    
+    if not getSafeToUnlock() then
+        I.MorroVault_Interlock.setSafeState(false)
+        
+    end
     setLightBlockersEnabled(false)
     I.TeleportBlocker.setDoorOpen(true)
     core.sound.playSound3d("SothaDoorOpen", doorObj, { volume = 3 })
+    world.mwscript.getGlobalVariables(world.players[1]).zhac_vault_doorsafe = 0
+    
     async:newUnsavableSimulationTimer(openDelay, function()
         world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 1
         async:newUnsavableSimulationTimer(0.5, function()
@@ -51,22 +82,44 @@ local function openDoor()
         )
     end
     )
-
     playerIsInVault = world.players[1].position.x > 11318
+    if playerIsInVault then
+        playerExitingVault = true
+        playerEnteringVault = false
+    else
+        playerExitingVault = false
+        playerEnteringVault = true
+
+    end
     checkForExit = true
     openSoundStage = 0
 end
 local function closeDoor()
-    I.TeleportBlocker.setDoorOpen(false)
+    if doorClosing then
+        return
+    end
+    local completion = anim.getCurrentTime(doorObj, "death1")
+    if completion and completion > 12 then--already closed
+        return
+
+    end
+    if  getSafeToUnlock() then
+        I.MorroVault_Interlock.setSafeState(true)
+        
+    end
+    world.mwscript.getGlobalVariables(world.players[1]).zhac_vault_doormagic = 1
     world.mwscript.getGlobalVariables(world.players[1]).zhac_doorstate = 0
     doorClosing = true
     openSoundStage = 0
 end
 local function finishDoorClose()
     core.sound.playSound3d("AB_Thunderclap0", doorObj, { volume = 3 })
+    world.mwscript.getGlobalVariables(world.players[1]).zhac_vault_doormagic = 0
     doorClosing = false
+    I.TeleportBlocker.setDoorOpen(false)
     
     setLightBlockersEnabled(true)
+    world.mwscript.getGlobalVariables(world.players[1]).zhac_vault_doorsafe = 1
 end
 local function autoClose()
     async:newUnsavableSimulationTimer(closeDelay, function()
@@ -106,6 +159,7 @@ local function onUpdate(dt)
         if completion then
             if completion > 6.6 then
                 doorOpening = false
+                world.mwscript.getGlobalVariables(world.players[1]).zhac_vault_doormagic = 0
 
                 if types.Player.quests(world.players[1]).zhac_vault1.stage < 41 then
                     if cutsceneState == 1 then
@@ -137,13 +191,13 @@ local function onUpdate(dt)
         end
     end
     if checkForExit then
-        if types.Player.quests(world.players[1]).zhac_vault1.stage >= 50 then
+       -- if types.Player.quests(world.players[1]).zhac_vault1.stage >= 50 then
             local playerIsInVaultNow = world.players[1].position.x > 11318
             if playerIsInVaultNow ~= playerIsInVault then
-                closeDoor()
+                autoClose()
                 checkForExit = false
             end
-        end
+      --  end
     end
 end
 --zhac_carryingitems
@@ -207,6 +261,14 @@ local function checkInWhenDone(id)
         checkinCOunt = -1
     end
 end
+local function onItemActive(item)
+    if item.recordId == "zhac_vault_exitmarker" then
+        item:remove()
+        async:newUnsavableSimulationTimer(openDelay, function()
+            openDoor()
+        end)
+    end
+end
 return
 {
     interfaceName = "MorroVault",
@@ -218,6 +280,7 @@ return
     engineHandlers = {
         onUpdate = onUpdate,
         onPlayerAdded = onPlayerAdded,
+        onItemActive = onItemActive,
     },
     eventHandlers = {
         goToVault = goToVault,

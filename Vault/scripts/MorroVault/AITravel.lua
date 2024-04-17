@@ -102,6 +102,18 @@ local function onUpdate(dt)
         speakWhenDone = false
     end
 end
+local function setSafeState(state)
+    async:newUnsavableSimulationTimer(math.random(0.1,3), function()
+        if not state then
+            self:enableAI(false)
+            types.Actor.setStance(self,1)
+        else
+            self:enableAI(true)
+    
+        end
+            end)
+
+end
 return {
     engineHandlers = {
         onUpdate = onUpdate,
@@ -112,5 +124,6 @@ return {
         exitVaultLeft = exitVaultLeft,
         exitVaultCenter = exitVaultCenter,
         returnToVaultRight = returnToVaultRight,
+        setSafeState = setSafeState,
     }
 }
