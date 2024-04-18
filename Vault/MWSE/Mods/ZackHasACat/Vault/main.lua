@@ -24,6 +24,9 @@ end
 
 local function openDoor()
     doorOpening = true
+    openSoundStage = 0
+    tes3.getReference("zhac_vault_lightblocker1"):disable()
+    tes3.getReference("zhac_vault_lightblocker2"):disable()
     if not doorObj then
         doorObj = tes3.getReference("zhac_vault_door") -- Retrieve the door object directly
     end
@@ -38,7 +41,6 @@ local function openDoor()
     }
     playerIsInVault = tes3.player.position.x > 11318
     checkForExit = true
-    openSoundStage = 0
 end
 
 local function closeDoor()
@@ -46,7 +48,13 @@ local function closeDoor()
     doorClosing = true
     openSoundStage = 0
 end
-
+local function finishDoorClose()
+    
+    tes3.getReference("zhac_vault_lightblocker1"):enable()
+    tes3.getReference("zhac_vault_lightblocker2"):enable()
+    tes3.playSound({ sound = "AB_Thunderclap0", reference = doorObj, volume = 1 })
+    doorClosing = false
+end
 local function getAnimationTime(obj)
     return tes3.getAnimationTiming({ reference = obj })[1]
 end
@@ -66,8 +74,8 @@ local function onUpdate()
     if doorClosing then
         local timing = getAnimationTime(doorObj)
         if timing and timing > 12 then -- Approximately corresponds to 12 seconds based on the animation length
-            tes3.playSound({ sound = "AB_Thunderclap0", reference = doorObj, volume = 1 })
-            doorClosing = false
+           
+            finishDoorClose()
         elseif timing then
             local currentTime = timing
             if openSoundStage == 0 and currentTime > 7.4 then
@@ -111,13 +119,13 @@ local function onUpdate()
     -- Check if the player exits the vault
     if checkForExit then
         local stage = tes3.getGlobal("zhac_vault1_stage")
-        if stage and stage >= 50 then
+       -- if stage and stage >= 50 then
             local playerIsInVaultNow = tes3.player.position.x > 11318
             if playerIsInVaultNow ~= playerIsInVault then
                 closeDoor()
                 checkForExit = false
             end
-        end
+       -- end
     end
 end
 
@@ -138,5 +146,12 @@ event.register("activate", onActivation)
 local function onCellChanged()
     doorObj = nil -- Reset door object on cell change to avoid referencing errors
 end
+local function referenceActivatedCallback(e)
+    if e.reference.object.id:lower() == "zhac_vault_exitmarker" then
+        e.reference:delete()
+        openDoor()
+    end
+end
+event.register(tes3.event.referenceActivated, referenceActivatedCallback)
 
 event.register("cellChanged", onCellChanged)
