@@ -13,7 +13,8 @@ local RESDAYNIA_SANCTUARY = "Resdaynia Sanctuary"
 local ENTRANCE = RESDAYNIA_SANCTUARY .. ", Entrance"
 local POSITION_THRESHOLD = 11318  -- Positional boundary to detect significant movement in or out of the vault entrance
 local VAULT_POSITION = util.vector3(9726.462890625, 4234.05419921875, 11393) -- Last safe position inside the vault
-
+local storedValues = {}
+local questsToCancel = {"TR_dbAttack","A2_2_6thHouse"}
 local function startsWith(inputString, startString)
     return string.sub(inputString, 1, string.len(startString)) == startString
 end
@@ -38,7 +39,24 @@ local function isInVault(actor)
         return true
     end
 end
-
+local function enterVaultMode()
+    world.players[1]:sendEvent("showPlayerMessage","Enter Vault")
+    if not storedValues then
+        storedValues = {}
+    end
+    for index, value in ipairs(questsToCancel) do
+        storedValues[value] = types.Player.quests(world.players[1])[value].stage
+        types.Player.quests(world.players[1])[value].stage = 100
+    end
+end
+local function exitVaultMode()
+    world.players[1]:sendEvent("showPlayerMessage","Exit Vault")
+    for index, value in ipairs(questsToCancel) do
+        local val = storedValues[value]
+        types.Player.quests(world.players[1])[value].stage = val
+    end
+    
+end
 local function handleCellTransition(cell)
     local cellName = cell.name
 
@@ -49,12 +67,14 @@ local function handleCellTransition(cell)
             else
                 types.Player.setTeleportingEnabled(player, false)
                 wasInRes = true
+                enterVaultMode()
             end
         end
     else
         if wasInRes then  -- Player is leaving or has left the vault
             types.Player.setTeleportingEnabled(player, true)
             wasInRes = false
+            exitVaultMode()
         end
     end
 end
@@ -80,6 +100,7 @@ local function onUpdate()
         else
             types.Player.setTeleportingEnabled(player, false)
             wasInRes = true
+            enterVaultMode()
         end
     elseif not isInVault(player) and wasInRes and player.cell.name ~= ENTRANCE then
         bringPlayerBack()
@@ -104,6 +125,7 @@ local function onUpdate()
             end
         end
         
+        exitVaultMode()
         types.Player.setTeleportingEnabled(player, true)
         wasInRes = false
     end
@@ -127,12 +149,13 @@ return {
     engineHandlers = {
         onUpdate = onUpdate,
         onSave = function()
-            return { wasInRes = wasInRes, doorIsOpen = doorIsOpen }
+            return { wasInRes = wasInRes, doorIsOpen = doorIsOpen, storedValues = storedValues, }
         end,
         onLoad = function(data)
             if data then
                 wasInRes = data.wasInRes
                 doorIsOpen = data.doorIsOpen
+                storedValues = data.storedValues
             end
         end
     }
