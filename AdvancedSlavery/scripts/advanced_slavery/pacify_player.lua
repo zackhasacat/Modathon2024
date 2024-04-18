@@ -69,7 +69,6 @@ local function onInputAction(action)
                 end
             end
         else
-            print()
         end
     end
 end
