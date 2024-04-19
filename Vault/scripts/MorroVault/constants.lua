@@ -1,3 +1,0 @@
-return{
-    contentFile = "MorroVault.esp"
-}
