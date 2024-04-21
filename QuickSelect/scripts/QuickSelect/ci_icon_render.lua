@@ -1,0 +1,147 @@
+local ui = require("openmw.ui")
+local I = require("openmw.interfaces")
+
+local v2 = require("openmw.util").vector2
+local util = require("openmw.util")
+local cam = require("openmw.interfaces").Camera
+local core = require("openmw.core")
+local self = require("openmw.self")
+local nearby = require("openmw.nearby")
+local types = require("openmw.types")
+local Camera = require("openmw.camera")
+local camera = require("openmw.camera")
+local input = require("openmw.input")
+local async = require("openmw.async")
+local storage = require("openmw.storage")
+local function getIconSize()
+    return 40
+end
+local savedTextures = {}
+local function textContent(text)
+    return {
+        type = ui.TYPE.Text,
+        template = I.MWUI.templates.textHeader,
+        props = {
+            text = tostring(text),
+            textSize = 10 * 1,
+            arrange = ui.ALIGNMENT.Start,
+            align = ui.ALIGNMENT.Start
+        }
+    }
+end
+local function imageContent(resource, half)
+local size = getIconSize()
+local opacity = 1
+if half then
+    opacity = 0.5   
+end
+    local size2 = size
+if half then
+    size2 = size2 / 2
+end
+    return {
+        type = ui.TYPE.Image,
+        props = {
+            resource = resource,
+            size = util.vector2(size, size2),
+            alpha = opacity
+            -- relativeSize = util.vector2(1,1)
+        }
+    }
+end
+local function getTexture(path)
+    if not savedTextures[path] and path then
+        savedTextures[path] = ui.texture({ path = path })
+    end
+    return savedTextures[path]
+end
+local function formatNumber(num)
+    local threshold = 1000
+    local millionThreshold = 1000000
+
+    if num >= millionThreshold then
+        local formattedNum = math.floor(num / millionThreshold)
+        return string.format("%dm", formattedNum)
+    elseif num >= threshold then
+        local formattedNum = math.floor(num / threshold)
+        return string.format("%dk", formattedNum)
+    else
+        return tostring(num)
+    end
+end
+local function FindEnchant(item)
+    if not item or not item.id then
+        return nil
+    end
+    if item.enchant then
+        return item.enchant
+    end
+    if (item == nil or item.type == nil or item.type.record(item) == nil or item.type.record(item).enchant == nil or item.type.record(item).enchant == "") then
+        return nil
+    end
+    return item.type.record(item).enchant
+end
+
+local function getItemIcon(item,half)
+
+    local itemIcon = nil
+
+    local selectionResource
+    local drawFavoriteStar = true
+    selectionResource = getTexture("icons\\selected.tga")
+    local pendingText = getTexture("icons\\buying.tga")
+    local magicIcon = FindEnchant(item) and FindEnchant(item) ~= "" and getTexture("textures\\menu_icon_magic_mini.dds")
+    local text = ""
+    if item and item.type then
+        local record = item.type.record(item)
+        if not record then
+            print("No record for " .. item.recordId)
+        else
+            print(record.icon)
+        end
+        if item.count > 1 then
+            text = formatNumber(item.count)
+        end
+
+        itemIcon = getTexture(record.icon)
+    end
+    
+    local context = ui.content {
+        imageContent(magicIcon,half),
+        imageContent(itemIcon,half),
+        textContent(tostring(text))
+    }
+
+    return context
+    
+end
+local function getSpellIcon(iconPath,half)
+    local itemIcon = nil
+
+    local selectionResource
+    local drawFavoriteStar = true
+    selectionResource = getTexture("icons\\selected.tga")
+    local pendingText = getTexture("icons\\buying.tga")
+
+    itemIcon = getTexture(iconPath)
+
+    local context = ui.content {
+        imageContent(itemIcon,half),
+    }
+
+    return context
+end
+
+
+return {
+    interfaceName = "Controller_Icon",
+    interface = {
+        version = 1,
+        getItemIcon = getItemIcon,
+        getSpellIcon = getSpellIcon,
+    },
+    eventHandlers = {
+    },
+    engineHandlers = {
+    }
+}
