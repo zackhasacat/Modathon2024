@@ -8,6 +8,7 @@ local util = require('openmw.util')
 local ui = require('openmw.ui')
 local input = require('openmw.input')
 local I = require('openmw.interfaces')
+local settings = require("scripts.QuickSelect.qs_settings")
 local function getIconSize()
     return 40
 end
@@ -109,5 +110,8 @@ return {
     },
     engineHandlers = {
         onInputAction = onInputAction,
+        onLoad = function ()
+            I.QuickSelect_Hotbar.drawHotbar()
+        end
     }
 }

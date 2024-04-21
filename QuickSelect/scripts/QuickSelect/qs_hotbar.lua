@@ -3,12 +3,13 @@ local core = require("openmw.core")
 local self = require("openmw.self")
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
-local camera = require('openmw.camera')
+local storage = require('openmw.storage')
 local async = require('openmw.async')
 local util = require('openmw.util')
 local ui = require('openmw.ui')
 local I = require('openmw.interfaces')
 
+local settings = storage.playerSection("SettingsQuickSelect")
 local utility = require("scripts.QuickSelect.qs_utility")
 local hotBarElement
 local num = 1
@@ -94,32 +95,35 @@ local function drawHotbar()
     if hotBarElement then
         hotBarElement:destroy()
     end
-    local xContent = {}
-    local content  = {}
-    num            = 1 + (10 * I.QuickSelect.getSelectedPage())
+    local xContent         = {}
+    local content          = {}
+    num                    = 1 + (10 * I.QuickSelect.getSelectedPage())
     --local trainerRow = renderItemBoxed({}, util.vector2((160 * scale) * 7, 400 * scale),
     ---    I.MWUI.templates.padding)
-    
-    if I.QuickSelect.getSelectedPage() > 0 then
-        
-    num            = 1 + (10 * (I.QuickSelect.getSelectedPage() - 1))
-        table.insert(content,
-            utility.renderItemBoxed(utility.flexedItems(getHotbarItems(true), true, util.vector2(0.5, 0.5)),
-                utility.scaledVector2(900, 100),
-                I.MWUI.templates.padding,
-                util.vector2(0.5, 0.5)))
+    local showExtraHotbars = settings:get("showExtraHotbars")
+    if showExtraHotbars then
+        if I.QuickSelect.getSelectedPage() > 0 then
+            num = 1 + (10 * (I.QuickSelect.getSelectedPage() - 1))
+            table.insert(content,
+                utility.renderItemBoxed(utility.flexedItems(getHotbarItems(true), true, util.vector2(0.5, 0.5)),
+                    utility.scaledVector2(900, 100),
+                    I.MWUI.templates.padding,
+                    util.vector2(0.5, 0.5)))
+        end
     end
     table.insert(content,
         utility.renderItemBoxed(utility.flexedItems(getHotbarItems(), true, util.vector2(0.5, 0.5)),
             utility.scaledVector2(900, 100),
             I.MWUI.templates.padding,
             util.vector2(0.5, 0.5)))
-    if I.QuickSelect.getSelectedPage() <2 then
-        table.insert(content,
-            utility.renderItemBoxed(utility.flexedItems(getHotbarItems(true), true, util.vector2(0.5, 0.5)),
-                utility.scaledVector2(900, 100),
-                I.MWUI.templates.padding,
-                util.vector2(0.5, 0.5)))
+    if showExtraHotbars then
+        if I.QuickSelect.getSelectedPage() < 2 then
+            table.insert(content,
+                utility.renderItemBoxed(utility.flexedItems(getHotbarItems(true), true, util.vector2(0.5, 0.5)),
+                    utility.scaledVector2(900, 100),
+                    I.MWUI.templates.padding,
+                    util.vector2(0.5, 0.5)))
+        end
     end
     content = ui.content(content)
     hotBarElement = ui.create {
