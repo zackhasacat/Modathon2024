@@ -116,7 +116,7 @@ local function showMessageBox(winName, textLines, buttons)
         error("No content items")
     end
 
-    for index, contentx in ipairs(contents) do--Print the actual text lines
+    for index, contentx in ipairs(contents) do----print the actual text lines
         local item = {
             type = ui.TYPE.Flex,
             content = ui.content(contentx),

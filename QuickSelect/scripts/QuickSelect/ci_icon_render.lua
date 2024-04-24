@@ -30,15 +30,15 @@ local function textContent(text)
     }
 end
 local function imageContent(resource, half)
-local size = getIconSize()
-local opacity = 1
-if half then
-    opacity = 0.5   
-end
+    local size = getIconSize()
+    local opacity = 1
+    if half then
+        opacity = 0.5
+    end
     local size2 = size
-if half then
-    size2 = size2 / 2
-end
+    if half then
+        size2 = size2 / 2
+    end
     return {
         type = ui.TYPE.Image,
         props = {
@@ -82,8 +82,7 @@ local function FindEnchant(item)
     return item.type.record(item).enchant
 end
 
-local function getItemIcon(item,half)
-
+local function getItemIcon(item, half, selected)
     local itemIcon = nil
 
     local selectionResource
@@ -95,9 +94,9 @@ local function getItemIcon(item,half)
     if item and item.type then
         local record = item.type.record(item)
         if not record then
-            print("No record for " .. item.recordId)
+            --print("No record for " .. item.recordId)
         else
-            print(record.icon)
+            --print(record.icon)
         end
         if item.count > 1 then
             text = formatNumber(item.count)
@@ -105,17 +104,21 @@ local function getItemIcon(item,half)
 
         itemIcon = getTexture(record.icon)
     end
-    
+
+    local selectedContent = {}
+    if selected then
+        selectedContent = imageContent(selectionResource)
+    end
     local context = ui.content {
-        imageContent(magicIcon,half),
-        imageContent(itemIcon,half),
+        selectedContent,
+        imageContent(magicIcon, half),
+        imageContent(itemIcon, half),
         textContent(tostring(text))
     }
 
     return context
-    
 end
-local function getSpellIcon(iconPath,half)
+local function getSpellIcon(iconPath, half, selected)
     local itemIcon = nil
 
     local selectionResource
@@ -123,22 +126,56 @@ local function getSpellIcon(iconPath,half)
     selectionResource = getTexture("icons\\selected.tga")
     local pendingText = getTexture("icons\\buying.tga")
 
+    local selectedContent = {}
+    if selected then
+        selectedContent = imageContent(selectionResource)
+    end
     itemIcon = getTexture(iconPath)
 
     local context = ui.content {
-        imageContent(itemIcon,half),
+        imageContent(itemIcon, half),
+        selectedContent,
     }
 
     return context
 end
+local function getEmptyIcon(half, num, selected)
+    local selectionResource
+    local drawFavoriteStar = true
+    selectionResource = getTexture("icons\\selected.tga")
 
+    local selectedContent = {}
+    if selected then
+        selectedContent = imageContent(selectionResource)
+    end
+    return ui.content {
+        selectedContent,
+        {
+            type = ui.TYPE.Text,
+            template = I.MWUI.templates.textNormal,
+            props = {
+                text = tostring(num),
+                textSize = 20 * 1,
+                relativePosition = util.vector2(0.5, 0.5),
+                anchor = util.vector2(0.5, 0.5),
+                arrange = ui.ALIGNMENT.Center,
+                align = ui.ALIGNMENT.Center,
+            },
+            num = num,
+            events = {
+                --          mouseMove = async:callback(mouseMove),
+            },
+        }
+    }
+end
 
 return {
-    interfaceName = "Controller_Icon",
+    interfaceName = "Controller_Icon_QS",
     interface = {
         version = 1,
         getItemIcon = getItemIcon,
         getSpellIcon = getSpellIcon,
+        getEmptyIcon = getEmptyIcon,
     },
     eventHandlers = {
     },

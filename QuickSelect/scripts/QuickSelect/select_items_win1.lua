@@ -46,7 +46,7 @@ local function mouseClick(mouseEvent, data)
         local spell = data.props.spellData
 
         if not spell.id then
-            print("no id")
+            --print("no id")
         end
         if spell.enchant then
             I.QuickSelect_Storage.saveStoredEnchantData(spell.enchant, spell.id, slotToSave)
@@ -129,7 +129,7 @@ end
 local function createItemIcon(item, spell, num)
     local icon
     if item and not spell then
-        icon = I.Controller_Icon.getItemIcon(item)
+        icon = I.Controller_Icon_QS.getItemIcon(item)
     else
         return {}
     end
@@ -157,9 +157,9 @@ end
 local function createHotbarItem(item, xicon, num, data)
     local icon
     if item and not xicon then
-        icon = I.Controller_Icon.getItemIcon(item)
+        icon = I.Controller_Icon_QS.getItemIcon(item)
     elseif xicon then
-        icon = I.Controller_Icon.getSpellIcon(xicon)
+        icon = I.Controller_Icon_QS.getSpellIcon(xicon)
     elseif num then
         icon = ui.content {
             {
@@ -208,7 +208,7 @@ local function getHotbarItems()
                 if spell then
                     effect = spell.effects[1]
                     icon = effect.effect.icon
-                    --    print("Spell" .. data.spell)
+                    --    --print("Spell" .. data.spell)
                 end
             elseif data.spellType:lower() == "enchant" then
                 local enchant = utility.getEnchantment(data.enchantId)
@@ -319,7 +319,7 @@ local function drawSpellSelect()
         table.insert(spellsAndIds,
             { id = ench.item.recordId, name = ench.item.type.record(ench.item).name, type = "Enchant", enchant = ench
             .item.type.record(ench.item).enchant })
-        print("ench nane" .. ench.item.type.record(ench.item).name)
+        --print("ench nane" .. ench.item.type.record(ench.item).name)
     end
     for i = 1, 10, 1 do
         if spellsAndIds[i] then

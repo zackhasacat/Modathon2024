@@ -18,7 +18,7 @@ local function getIconSizeGrow()
     return (40) + ret * 0.25
 end
 local function createHotbarItem(item, spell)
-    local icon = I.Controller_Icon.getItemIcon(item)
+    local icon = I.Controller_Icon_QS.getItemIcon(item)
     local boxedIcon = { --box around the titem
         type = ui.TYPE.Container,
         props = {
@@ -111,7 +111,7 @@ return {
     engineHandlers = {
         onInputAction = onInputAction,
         onLoad = function ()
-            I.QuickSelect_Hotbar.drawHotbar()
+           -- I.QuickSelect_Hotbar.drawHotbar()
         end
     }
 }

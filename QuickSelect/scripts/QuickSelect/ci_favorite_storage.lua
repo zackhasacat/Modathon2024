@@ -26,7 +26,7 @@ local function getFavoriteItemData(slot)
 end
 local function saveStoredItemData(id, slot)
     getFavoriteItems()
-    print(id, slot)
+    --print(id, slot)
     storedItems[slot].item = id
 end
 local function saveStoredSpellData(spellId, spellType, slot)
@@ -53,7 +53,7 @@ local function isSlotEquipped(slot)
             if not spell then return false end
             return spell.id == item.spell
         elseif item.enchantId then
-            print("enchant:", slot)
+            --print("enchant:", slot)
             local equip = types.Actor.getSelectedEnchantedItem(self)
             if not equip then return false end
             local realItem = types.Actor.inventory(self):find(item.itemId)

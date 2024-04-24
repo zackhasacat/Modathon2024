@@ -131,7 +131,7 @@ local function renderItemChoiceX(itemList, horizontal, vertical, align, anchor, 
     end
     return ui.create {
         layer = layer or "InventoryWindow",
-        template = I.MWUI.templates.boxTransparent,
+        template = I.MWUI.templates.box,
         props = {
             -- relativePosition = util.vector2(0.65, 0.8),
             anchor = anchor,
@@ -356,6 +356,6 @@ return {
         elseif item.type == types.Light then
             return types.Actor.EQUIPMENT_SLOT.CarriedLeft
         end
-        -- print("Couldn't find slot for " .. item.recordId)
+        -- --print("Couldn't find slot for " .. item.recordId)
         return nil
     end}
