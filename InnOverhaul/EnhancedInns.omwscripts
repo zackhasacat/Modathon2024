@@ -1,0 +1,11 @@
+GLOBAL:scripts/zsurvival/itemdecay.lua
+GLOBAL:scripts/InnOverhaul/InnOverhaul_G.lua
+GLOBAL:scripts/InnOverhaul/Settings_G.lua
+PLAYER:scripts/InnOverhaul/Settings_P.lua
+ACTIVATOR,DOOR:scripts/InnOverhaul/InnOverhaul_L.lua
+NPC:scripts/InnOverhaul/InnOverhaul_NPC.lua
+PLAYER:scripts/InnOverhaul/InnOverhaul_P.lua
+PLAYER:scripts/modules/Events/Events_P.lua
+GLOBAL:scripts/modules/Events/Events_G.lua
+ACTIVATOR,DOOR:scripts/modules/DataManager/DataManager.lua
+GLOBAL:scripts/modules/DataManager/DataManager_G.lua

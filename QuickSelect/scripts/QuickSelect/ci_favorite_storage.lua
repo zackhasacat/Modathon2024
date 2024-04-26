@@ -27,15 +27,28 @@ end
 local function saveStoredItemData(id, slot)
     getFavoriteItems()
     --print(id, slot)
+    storedItems[slot].spell     = nil
+    storedItems[slot].spellType = nil
+    storedItems[slot].enchantId = nil
+    storedItems[slot].itemId    = nil
     storedItems[slot].item = id
+
 end
 local function saveStoredSpellData(spellId, spellType, slot)
     getFavoriteItems()
+    storedItems[slot].spell     = nil
+    storedItems[slot].spellType = nil
+    storedItems[slot].enchantId = nil
+    storedItems[slot].itemId    = nil
     storedItems[slot].spellType = spellType
     storedItems[slot].spell     = spellId
 end
 local function saveStoredEnchantData(enchantId, itemId, slot)
     getFavoriteItems()
+    storedItems[slot].spell     = nil
+    storedItems[slot].spellType = nil
+    storedItems[slot].enchantId = nil
+    storedItems[slot].itemId    = nil
     storedItems[slot].spellType = "Enchant"
     storedItems[slot].enchantId = enchantId
     storedItems[slot].itemId    = itemId

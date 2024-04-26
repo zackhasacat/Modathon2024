@@ -1,0 +1,2 @@
+GLOBAL:scripts/DummyTrain/DummyTrain_G.lua
+PLAYER:scripts/DummyTrain/DummyTrain_P.lua

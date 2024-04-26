@@ -95,11 +95,11 @@ local function onFrame(dt)
         local weapon = getEquipment(self)[types.Actor.EQUIPMENT_SLOT.CarriedRight]
 
         local arrow = getEquipment(self)[types.Actor.EQUIPMENT_SLOT.Ammunition]
-        if weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanBow then
+        if weapon and weapon.type == types.Weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanBow then
             rotOffset = 0
-        elseif weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanCrossbow then
+        elseif weapon and weapon.type == types.Weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanCrossbow then
             rotOffset = 0
-        elseif weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanThrown then
+        elseif weapon and weapon.type == types.Weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanThrown then
             rotOffset = 180
             arrow = weapon
         else
