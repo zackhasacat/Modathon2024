@@ -20,13 +20,17 @@ function needBase.newNeed(name, base, decayRate)
     newNeed.decayRate = decayRate
     return newNeed
 end
-
+function needBase.relieve(self,amount)
+    self.current = self.current + amount
+    if self.current > self.base then
+        self.current = self.base
+    end
+    
+end
 function needBase.save(self)
     local savedTable = {}
 
-    -- Iterate over all keys and values in the object
     for key, value in pairs(self) do
-        -- Check if the value is not a function
         if type(value) ~= "function" then
             savedTable[key] = value
         end

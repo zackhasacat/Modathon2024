@@ -1,1 +1,10 @@
+
+PLAYER:scripts/survivalcollab/ui_temp.lua
 PLAYER:scripts/survivalcollab/needs_p.lua
+
+PLAYER:scripts/survivalcollab/energy.lua
+PLAYER:scripts/survivalcollab/thirst.lua
+PLAYER:scripts/survivalcollab/hunger.lua
+
+GLOBAL:scripts/survivalcollab/events_g.lua
+PLAYER:scripts/survivalcollab/events_p.lua

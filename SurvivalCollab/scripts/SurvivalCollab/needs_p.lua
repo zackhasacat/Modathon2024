@@ -1,4 +1,4 @@
-local cam = require('openmw.interfaces').Camera
+local I = require('openmw.interfaces')
 local camera = require('openmw.camera')
 local core = require('openmw.core')
 local self = require('openmw.self')
@@ -17,8 +17,8 @@ local needs
 local function initNeeds()
     needs = {}
     local hunger = needBase.newNeed("Hunger", 100, 0.01)
-    local thirst = needBase.newNeed("Thirst", 100, 0.01)
-    local energy = needBase.newNeed("Energy", 100, 0.01)
+    local thirst = needBase.newNeed("Thirst", 100, 0.05)
+    local energy = needBase.newNeed("Energy", 100, 0.04)
     table.insert(needs, hunger)
     table.insert(needs, thirst)
     table.insert(needs, energy)
@@ -41,19 +41,36 @@ local function onUpdate(dt)
             value:update(minutesPassed)
         end
         lastGameTime = core.getGameTime()
-        print(minutesPassed)
+        I.NeedsPlayer_UI.updateElement()
         
+    end
+end
+
+local function relieveNeed(name,amount)
+    for index, need in ipairs(needs) do
+        if need.name == name then
+            need:relieve(amount)
+            I.NeedsPlayer_UI.updateElement()
+            return
+        end
     end
 end
 return {
     interfaceName = "NeedsPlayer",
     interface = {
+        relieveNeed = relieveNeed,
         getNeedValue = function(name)
             for index, need in ipairs(needs) do
                 if need.name == name then
                     return need.current
                 end
             end
+        end,
+        getNeeds = function ()
+            if not needs then
+                initNeeds()
+            end
+            return needs
         end
     },
     engineHandlers = {
@@ -68,6 +85,7 @@ return {
                     table.insert(needs,loadedNeed)
                 end
                 lastGameTime = data.lastGameTime
+                I.NeedsPlayer_UI.updateElement()
             end
         end,
         onSave = function()
