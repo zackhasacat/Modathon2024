@@ -76,10 +76,10 @@ local function FindEnchant(item)
     if item.enchant then
         return item.enchant
     end
-    if (item == nil or item.type == nil or item.type.record(item) == nil or item.type.record(item).enchant == nil or item.type.record(item).enchant == "") then
+    if (item == nil or item.type == nil or item.type.records[item.recordId] == nil or item.type.records[item.recordId].enchant == nil or item.type.records[item.recordId].enchant == "") then
         return nil
     end
-    return item.type.record(item).enchant
+    return item.type.records[item.recordId].enchant
 end
 
 local function getItemIcon(item, half, selected)
@@ -92,7 +92,7 @@ local function getItemIcon(item, half, selected)
     local magicIcon = FindEnchant(item) and FindEnchant(item) ~= "" and getTexture("textures\\menu_icon_magic_mini.dds")
     local text = ""
     if item and item.type then
-        local record = item.type.record(item)
+        local record = item.type.records[item.recordId]
         if not record then
             --print("No record for " .. item.recordId)
         else

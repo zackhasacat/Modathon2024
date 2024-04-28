@@ -58,7 +58,7 @@ end
 local function makeSlave(npc, bracerId)
 
   if (npc:hasScript(SlaveScript) == false) then
-    local NPCKey = createMisc("Key to " .. types.NPC.record(npc).name .. "'s slave bracer")
+    local NPCKey = createMisc("Key to " .. types.NPC.records[npc.recordId].name .. "'s slave bracer")
     NPCKey:moveInto(world.players[1])
     local newBracer
     if not bracerId then

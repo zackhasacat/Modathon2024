@@ -28,10 +28,10 @@ local function getEnchantment(id) --
     return core.magic.enchantments.records[id]
 end
 local function FindEnchantment(item)
-    if (item == nil or item.type == nil or item.type.record(item) == nil or item.type.record(item).enchant == nil or item.type.record(item).enchant == "") then
+    if (item == nil or item.type == nil or item.type.records[item.recordId] == nil or item.type.records[item.recordId].enchant == nil or item.type.records[item.recordId].enchant == "") then
         return nil
     end
-    return getEnchantment(item.type.record(item).enchant)
+    return getEnchantment(item.type.records[item.recordId].enchant)
 end
 local function calculateTextScale()
     local screenSize = ui.screenSize()
@@ -301,55 +301,55 @@ return {
         end
         --Finds a equipment slot for an inventory item, if it has one,
         if item.type == types.Armor then
-            if (types.Armor.record(item).type == types.Armor.TYPE.RGauntlet) then
+            if (types.Armor.records[item.recordId].type == types.Armor.TYPE.RGauntlet) then
                 return types.Actor.EQUIPMENT_SLOT.RightGauntlet
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.LGauntlet) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.LGauntlet) then
                 return types.Actor.EQUIPMENT_SLOT.LeftGauntlet
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.Boots) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.Boots) then
                 return types.Actor.EQUIPMENT_SLOT.Boots
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.Cuirass) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.Cuirass) then
                 return types.Actor.EQUIPMENT_SLOT.Cuirass
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.Greaves) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.Greaves) then
                 return types.Actor.EQUIPMENT_SLOT.Greaves
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.LBracer) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.LBracer) then
                 return types.Actor.EQUIPMENT_SLOT.LeftGauntlet
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.RBracer) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.RBracer) then
                 return types.Actor.EQUIPMENT_SLOT.RightGauntlet
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.RPauldron) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.RPauldron) then
                 return types.Actor.EQUIPMENT_SLOT.RightPauldron
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.LPauldron) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.LPauldron) then
                 return types.Actor.EQUIPMENT_SLOT.LeftPauldron
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.RPauldron) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.RPauldron) then
                 return types.Actor.EQUIPMENT_SLOT.RightPauldron
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.Helmet) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.Helmet) then
                 return types.Actor.EQUIPMENT_SLOT.Helmet
-            elseif (types.Armor.record(item).type == types.Armor.TYPE.Shield) then
+            elseif (types.Armor.records[item.recordId].type == types.Armor.TYPE.Shield) then
                 return types.Actor.EQUIPMENT_SLOT.CarriedLeft
             end
         elseif item.type == types.Clothing then
-            if (types.Clothing.record(item).type == types.Clothing.TYPE.Amulet) then
+            if (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Amulet) then
                 return types.Actor.EQUIPMENT_SLOT.Amulet
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Belt) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Belt) then
                 return types.Actor.EQUIPMENT_SLOT.Belt
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.LGlove) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.LGlove) then
                 return types.Actor.EQUIPMENT_SLOT.LeftGauntlet
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.RGlove) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.RGlove) then
                 return types.Actor.EQUIPMENT_SLOT.RightGauntlet
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Ring) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Ring) then
                 return types.Actor.EQUIPMENT_SLOT.RightRing
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Skirt) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Skirt) then
                 return types.Actor.EQUIPMENT_SLOT.Skirt
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Shirt) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Shirt) then
                 return types.Actor.EQUIPMENT_SLOT.Shirt
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Shoes) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Shoes) then
                 return types.Actor.EQUIPMENT_SLOT.Boots
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Robe) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Robe) then
                 return types.Actor.EQUIPMENT_SLOT.Robe
-            elseif (types.Clothing.record(item).type == types.Clothing.TYPE.Pants) then
+            elseif (types.Clothing.records[item.recordId].type == types.Clothing.TYPE.Pants) then
                 return types.Actor.EQUIPMENT_SLOT.Pants
             end
         elseif item.type == types.Weapon then
-            if (item.type.record(item).type == types.Weapon.TYPE.Arrow or item.type.record(item).type == types.Weapon.TYPE.Bolt) then
+            if (item.type.records[item.recordId].type == types.Weapon.TYPE.Arrow or item.type.records[item.recordId].type == types.Weapon.TYPE.Bolt) then
                 return types.Actor.EQUIPMENT_SLOT.Ammunition
             end
             return types.Actor.EQUIPMENT_SLOT.CarriedRight

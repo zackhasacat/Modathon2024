@@ -11,17 +11,13 @@ local I = require("openmw.interfaces")
 local input = require("openmw.input")
 local calendar = require('openmw_aux.calendar')
 local time = require('openmw_aux.time')
-local multilineText = [[
-This is line one of the text.
-This is line two of the text.
-This is line three of the text.
-]]
+local statBar = require("scripts.SurvivalCollab.renderStatBar")
 local element
 local function textToShow()
     local needs = I.NeedsPlayer.getNeeds()
     local ls = {}
     for index, value in ipairs(needs) do
-        table.insert(ls,value.name .. ": " .. tostring(math.ceil(value.current)) .. "/" .. tostring(value.base))
+        table.insert(ls,value.name .. ": " .. tostring(math.ceil(value.current)) .. "/" .. tostring(value:getBaseLevel()))
     end
     return ls
 end
@@ -77,14 +73,19 @@ local function updateElement()
     local content = {}
     local lines = textToShow()
     for index, value in ipairs(lines) do
-        table.insert(content,textContent(value))
+     --   table.insert(content,statBar.renderStat(nil,"hu")))
+    end
+    local needs = I.NeedsPlayer.getNeeds()
+    local ls = {}
+    for index, value in ipairs(needs) do
+        table.insert(content,statBar.renderStat(nil,value.name,value.current,value:getBaseLevel(),value.name))
     end
     element = ui.create {
         layer = "HUD",
         template = I.MWUI.templates.padding
         ,
         props = {
-            anchor = util.vector2(0.5, 1),
+            anchor = util.vector2(0.5, 0.7),
             relativePosition = util.vector2(0.5, 1),
             arrange = ui.ALIGNMENT.Center,
             align = ui.ALIGNMENT.Center,
@@ -94,7 +95,7 @@ local function updateElement()
                 type = ui.TYPE.Flex,
                 content = ui.content(content),
                 props = {
-                    horizontal = false,
+                    horizontal = true,
                     align = ui.ALIGNMENT.Center,
                     arrange = ui.ALIGNMENT.Center,
                     size = util.vector2(380, 40),

@@ -88,16 +88,16 @@ local function getConditionLine(item)
     local currentCondition = types.Item.itemData(item).condition
     if item.type == types.Light then
     elseif item.type == types.Armor or item.type == types.Weapon then
-        local maxCondition = item.type.record(item).health
+        local maxCondition = item.type.records[item.recordId].health
         line = "Condition: " .. tostring(math.floor(currentCondition or maxCondition)) .. "\\" .. tostring(maxCondition)
     elseif item.type == types.Lockpick or item.type == types.Probe then
-        local maxCondition = item.type.record(item).maxCondition
+        local maxCondition = item.type.records[item.recordId].maxCondition
         line               = "Uses: " .. tostring(currentCondition or maxCondition)
     end
     return line
 end
 local function getItemValue(item, ignoreCondition)
-    local record = item.type.record(item)
+    local record = item.type.records[item.recordId]
     local value = record.value
     local maxCondition = 0
     if record.health then
@@ -140,7 +140,7 @@ local function genToolTips(item)
     elseif item.spell and item.spell.recordId then
         item = item.spell
     end
-    local record = item.type.record(item)
+    local record = item.type.records[item.recordId]
     local name = record.name
     if item.type == types.Miscellaneous and types.Miscellaneous.getSoul(item) then
         local soulName = types.Creature.record(types.Miscellaneous.getSoul(item)).name
@@ -155,18 +155,18 @@ local function genToolTips(item)
         table.insert(list, weaponType)
         if weaponType == core.getGMST("sSkillMarksman") then
             table.insert(list,
-                string.format(core.getGMST("sAttack") .. ": %g - %g", types.Weapon.record(item).chopMinDamage,
-                    types.Weapon.record(item).chopMaxDamage))
+                string.format(core.getGMST("sAttack") .. ": %g - %g", types.Weapon.records[item.recordId].chopMinDamage,
+                    types.Weapon.records[item.recordId].chopMaxDamage))
         else
             table.insert(list,
-                string.format(core.getGMST("sChop") .. ": %g - %g", types.Weapon.record(item).chopMinDamage,
-                    types.Weapon.record(item).chopMaxDamage))
+                string.format(core.getGMST("sChop") .. ": %g - %g", types.Weapon.records[item.recordId].chopMinDamage,
+                    types.Weapon.records[item.recordId].chopMaxDamage))
             table.insert(list,
-                string.format(core.getGMST("sSlash") .. ": %g - %g", types.Weapon.record(item).slashMinDamage,
-                    types.Weapon.record(item).slashMaxDamage))
+                string.format(core.getGMST("sSlash") .. ": %g - %g", types.Weapon.records[item.recordId].slashMinDamage,
+                    types.Weapon.records[item.recordId].slashMaxDamage))
             table.insert(list,
-                string.format(core.getGMST("sThrust") .. ": %g - %g", types.Weapon.record(item).thrustMinDamage,
-                    types.Weapon.record(item).thrustMaxDamage))
+                string.format(core.getGMST("sThrust") .. ": %g - %g", types.Weapon.records[item.recordId].thrustMinDamage,
+                    types.Weapon.records[item.recordId].thrustMaxDamage))
         end
     end
     local conditionLine = getConditionLine(item)
@@ -178,7 +178,7 @@ local function genToolTips(item)
         table.insert(list,
             core.getGMST("sWeight") .. ": " .. tostring(math.floor(record.weight)) .. " (" .. weightType .. ")")
         local armorSkillType = weightType:lower() .. "armor"
-        local rating = types.Armor.record(item).baseArmor * (types.NPC.stats.skills[armorSkillType](self).modified / 30)
+        local rating = types.Armor.records[item.recordId].baseArmor * (types.NPC.stats.skills[armorSkillType](self).modified / 30)
         table.insert(list, core.getGMST("sArmorRating") .. ": " .. tostring(math.floor(rating)))
     elseif record.weight > 0 then
         local weight = record.weight

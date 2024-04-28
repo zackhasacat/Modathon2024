@@ -23,23 +23,39 @@ local morrowindDrinks = {
     ["p_vintagecomberrybrandy1"] = {saturation = 3}
 }
 
+local savedDrinks = {}
+
 local function onConsume(potion)
     if morrowindDrinks[potion.recordId] then
         I.NeedsPlayer.relieveNeed("Thirst", morrowindDrinks[potion.recordId].saturation)
-        print("drinking")
+    elseif savedDrinks[potion.recordId] then
+        I.NeedsPlayer.relieveNeed("Thirst", savedDrinks[potion.recordId].saturation)
+   
     end
 end
-
+local function addSavedDrink(data)
+    savedDrinks[data.id] = {saturation = data.saturation}
+    
+end
 
 
 return {
     interfaceName = "NeedsPlayer_Thirst",
     interface = {
+        addSavedDrink = addSavedDrink,
     },
     engineHandlers = {
         onConsume = onConsume,
+        onSave = function ()
+            return {savedDrinks = savedDrinks}
+        end,
+        onLoad = function (data)
+            if data then
+                savedDrinks = data.savedDrinks
+            end
+        end
     },
     eventHandlers = {
-        RestEnd = RestEnd,
+        addSavedDrink = addSavedDrink,
     }
 }

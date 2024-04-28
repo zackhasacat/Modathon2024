@@ -22,6 +22,7 @@ local function initNeeds()
     table.insert(needs, hunger)
     table.insert(needs, thirst)
     table.insert(needs, energy)
+    I.NeedsPlayer_UI.updateElement()
 end
 local lastGameTime
 local function onUpdate(dt)
@@ -51,6 +52,7 @@ local function relieveNeed(name,amount)
         if need.name == name then
             need:relieve(amount)
             I.NeedsPlayer_UI.updateElement()
+            self:sendEvent("needRelieved", {name = name, amount = amount})
             return
         end
     end
@@ -93,7 +95,7 @@ return {
             for index, need in ipairs(needs) do
                 table.insert(needsSaved,need:save())
             end
-            return { needs = needsSaved, delay = delay, lastGameTime = lastGameTime }
+            return { needs = needsSaved, lastGameTime = lastGameTime }
         end,
         onUpdate = onUpdate,
     },

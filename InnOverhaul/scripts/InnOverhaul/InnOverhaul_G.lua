@@ -148,7 +148,7 @@ local function convertContainers(bed, owner, rented)
             end
         end
         for index, obj in ipairs(bed.cell:getAll()) do
-            if obj.owner.recordId and obj.type.baseType == types.Item and obj.type.record(obj).value < 100 then
+            if obj.owner.recordId and obj.type.baseType == types.Item and obj.type.records[obj.recordId].value < 100 then
                 local dist = (obj.position - bed.position):length()
                 local zDist = math.abs(bed.position.z - obj.position.z)
                 if dist < 500 and zDist < 100 then
@@ -203,7 +203,7 @@ local function findInns()
     for index, cell in ipairs(world.cells) do
         if not cell.isExterior then
             for index, npc in ipairs(cell:getAll(types.NPC)) do
-                local npcRecord = types.NPC.record(npc)
+                local npcRecord = types.NPC.records[npc.recordId]
                 if npcRecord.class:lower() == "publican" then
                     local bedCount = 0
                     local doorCount = 0
@@ -314,7 +314,7 @@ local function setInnRoomRented(cell, state, player)
                 end
                 innBed = obj
             elseif obj.type == types.NPC then
-                local record = types.NPC.record(obj)
+                local record = types.NPC.records[obj.recordId]
                 if record.class:lower() == "publican" then
                     innPublican = obj
                 end
@@ -572,7 +572,7 @@ local function teleportPlayer(pos)
 end
 
 local function npcActivation(npc, actor)
-    local class = types.NPC.record(npc).class
+    local class = types.NPC.records[npc.recordId].class
     if class:lower() == "publican" then
         local innBed
         for index, value in ipairs(npc.cell:getAll(types.Activator)) do
@@ -635,7 +635,7 @@ local function getRoomNavPos1(cell)
 end
 local function getRoomNavPos2(pos)
     for index, npc in ipairs(navCell:getAll(types.NPC)) do
-        local record = types.NPC.record(npc)
+        local record = types.NPC.records[npc.recordId]
         if record.class:lower() == "publican" then
             print(pos)
             npc:sendEvent('StartGuiding', { doorObj = navDoor, destPosition = pos })
