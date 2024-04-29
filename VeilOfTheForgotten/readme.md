@@ -23,7 +23,11 @@
 2. Extract the files into your Morrowind/Data Files directory.
 3. Enable the mod from the Morrowind startup menu under Data Files.
 
-
-Greetings, young one. I have waiting for your arrival for a long time. I require your help. I hold the power of the Veil of the Forgotten, which can be used through the Chrono Globes I've created. 
-
-If you'd like, you may ask me about my plans, or we can go straight into what needs to happen.
+TODO:
+MWSE port
+OpenMW port
+Topics for finding darvon, revealing his absence
+Place daedra in shrine, will only attack when Moriana does
+Activating stands with globe equipped places them on the stand
+Place wall covering shrine, only removed if scripts are present
+Moriana casts spell to remove the victim from time

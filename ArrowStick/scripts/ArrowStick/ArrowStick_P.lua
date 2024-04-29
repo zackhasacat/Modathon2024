@@ -102,6 +102,7 @@ local function onFrame(dt)
         elseif weapon and weapon.type == types.Weapon and weapon.type.record(weapon).type == types.Weapon.TYPE.MarksmanThrown then
             rotOffset = 180
             arrow = weapon
+            return
         else
             return
         end

@@ -1,0 +1,3 @@
+PLAYER:scripts/VeilOfTheForgotten/VOTF_P.Lua
+NPC,CREATURE:scripts/VeilOfTheForgotten/VOTF_A.lua
+GLOBAL:scripts/VeilOfTheForgotten/VOTF_G.lua
