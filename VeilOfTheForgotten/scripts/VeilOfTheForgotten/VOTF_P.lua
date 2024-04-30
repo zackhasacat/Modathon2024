@@ -7,6 +7,7 @@ local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
 local util = require('openmw.util')
 local ui = require('openmw.ui')
+local I = require('openmw.interfaces')
 local ambient = require('openmw.ambient')
 local rotOffset = 0
 local rotOffset2 = 0
@@ -142,7 +143,7 @@ local function onFrame(dt)
     elseif not drawing and wasDrawing then
         local weapon = getEquipment(self)[types.Actor.EQUIPMENT_SLOT.CarriedRight]
         if not weapon then
-            error("No weapon equipped")
+           return
         end
         if weapon.recordId == "zhac_ball_01" then
             findVictim()
@@ -161,5 +162,11 @@ return {
     },
     engineHandlers = {
         onFrame = onFrame,
+    },
+    eventHandlers = {
+        openCompShare = function (actor)
+            I.UI.setMode(I.UI.MODE.Companion, { target = actor })
+        end,
+        returnPendingActor = returnPendingActor,
     }
 }
