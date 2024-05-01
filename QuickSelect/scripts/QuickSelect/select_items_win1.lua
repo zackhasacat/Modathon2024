@@ -13,10 +13,12 @@ local tooltipData = require("scripts.QuickSelect.ci_tooltipgen")
 local messageBoxUtil = require("scripts.QuickSelect.messagebox")
 local QuickSelectWindow
 local hoveredOverId
+local spellMode = false
 local columnsAndRows = {}
 local selectedCol = 1
 local selectedRow = 1
-
+local startOffset =0
+local maxCount = 0
 local num = 1
 local scale = 0.8
 local tooltip
@@ -148,6 +150,8 @@ local function getItemRow()
     local items = {}
     local inv = types.Actor.inventory(self):getAll()
     local count = num + 10
+
+    maxCount = #inv
     while num < count do
         table.insert(items, createItemIcon(inv[num], nil, num))
         num = num + 1
@@ -229,7 +233,7 @@ local function drawItemSelect()
     end
     local xContent = {}
     local content  = {}
-    num            = 1
+    num            = 1 + startOffset
     --Draw search menu
 
     table.insert(content, utility.renderItemBold(core.getGMST("sQuickMenu6")))
@@ -258,6 +262,7 @@ local function drawItemSelect()
         utility.renderItemBoxed(utility.flexedItems(getItemRow(), true), utility.scaledVector2(900, 100),
             I.MWUI.templates.padding,
             util.vector2(0.5, 0.5)))
+            
     --rcontent = flexedItems(content,false)
     --   table.insert(content,flexedItems(lis, true))
     -- table.insert(content, imageContent(resource, size))
@@ -315,15 +320,20 @@ local function drawSpellSelect()
             table.insert(spellsAndIds, { id = spell.id, name = spell.name, type = "Spell" })
         end
     end
-    for index, ench in ipairs(getAllEnchantments(types.Actor.inventory(self), true)) do
+    local enchL = getAllEnchantments(types.Actor.inventory(self), true)
+  
+    for index, ench in ipairs(enchL) do
+        if index> startOffset then
         table.insert(spellsAndIds,
             { id = ench.item.recordId, name = ench.item.type.record(ench.item).name, type = "Enchant", enchant = ench
             .item.type.record(ench.item).enchant })
         --print("ench nane" .. ench.item.type.record(ench.item).name)
+        end
     end
+    maxCount = #spellsAndIds
     for i = 1, 10, 1 do
-        if spellsAndIds[i] then
-            table.insert(xContent, utility.renderItemBold(spellsAndIds[i].name, nil, nil, nil, true, spellsAndIds[i],{
+        if spellsAndIds[i + startOffset] then
+            table.insert(xContent, utility.renderItemBold(spellsAndIds[i + startOffset].name, nil, nil, nil, true, spellsAndIds[i + startOffset],{
                 mouseMove = async:callback(mouseMoveButton),
                 mousePress = async:callback(mouseClick)
             }))
@@ -489,8 +499,10 @@ local function ButtonClicked(data)
     local text = data.text
     num = 1
     if text == core.getGMST("sQuickMenu2") then
+        spellMode = false
         drawItemSelect()
     elseif text == core.getGMST("sQuickMenu3") then
+        spellMode = true
         drawSpellSelect()
     end
 end
@@ -513,5 +525,27 @@ return {
     engineHandlers = {
         onKeyPress = onKeyPress,
         onControllerButtonPress = onControllerButtonPress,
+        onMouseWheel = function (vert)
+            if not QuickSelectWindow then return end
+            local modifer = 10      
+
+            if spellMode then
+                modifer = 1
+            end
+            if vert > 0 then
+                startOffset = startOffset - modifer
+            elseif startOffset + modifer < maxCount  then
+                startOffset = startOffset + modifer
+            end
+            print(startOffset)
+            if startOffset < 0 then
+                startOffset = 0
+            end
+            if spellMode then
+                drawSpellSelect()
+            else
+                drawItemSelect()
+            end
+        end
     }
 }

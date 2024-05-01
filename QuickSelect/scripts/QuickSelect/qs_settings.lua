@@ -34,7 +34,7 @@ I.Settings.registerGroup {
             default = false
         },
         {
-            key = "enableLegacySummon",
+            key = "persistMode",
             renderer = "checkbox",
             name = "Enable Legacy Summon",
             description =

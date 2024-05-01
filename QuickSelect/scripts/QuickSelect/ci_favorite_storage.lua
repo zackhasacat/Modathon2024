@@ -40,6 +40,7 @@ local function saveStoredSpellData(spellId, spellType, slot)
     storedItems[slot].spellType = nil
     storedItems[slot].enchantId = nil
     storedItems[slot].itemId    = nil
+    storedItems[slot].item    = nil
     storedItems[slot].spellType = spellType
     storedItems[slot].spell     = spellId
 end
@@ -49,6 +50,7 @@ local function saveStoredEnchantData(enchantId, itemId, slot)
     storedItems[slot].spellType = nil
     storedItems[slot].enchantId = nil
     storedItems[slot].itemId    = nil
+    storedItems[slot].item    = nil
     storedItems[slot].spellType = "Enchant"
     storedItems[slot].enchantId = enchantId
     storedItems[slot].itemId    = itemId
