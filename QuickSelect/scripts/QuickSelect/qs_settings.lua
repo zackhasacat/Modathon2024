@@ -36,12 +36,21 @@ I.Settings.registerGroup {
         {
             key = "persistMode",
             renderer = "checkbox",
-            name = "Enable Legacy Summon",
+            name = "Show Hotbar at all times",
             description =
-            "If Legacy Summon is enabled, the summon spell will attempt to teleport to a predetermined location, if it can't find one, it will use the position in front of you.",
-            default = false
+            "If enabled, the hotbar will be visible at any time. If disabled, the hotbar will only be visible a hotkey is used, then will close when one is selected.",
+            default = true
+        },
+        {
+            key = "unEquipOnHotkey",
+            renderer = "checkbox",
+            name = "Unequip when selecting equipped items",
+            description =
+            "If enabled, selecting an item that is already equipped will unequip it. If disabled, selecting an item that is already equipped will do nothing.",
+            default = true
         }
     },
 
 }
+settings:get("unEquipOnHotkey")
 return settings

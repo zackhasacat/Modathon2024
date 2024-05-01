@@ -134,7 +134,7 @@ local function drawHotbar()
     num                    = 1 + (10 * I.QuickSelect.getSelectedPage())
     --local trainerRow = renderItemBoxed({}, util.vector2((160 * scale) * 7, 400 * scale),
     ---    I.MWUI.templates.padding)
-    local showExtraHotbars = settings:get("showExtraHotbars")
+    local showExtraHotbars = settings:get("previewOtherHotbars")
     if showExtraHotbars then
         if I.QuickSelect.getSelectedPage() > 0 then
             num = 1 + (10 * (I.QuickSelect.getSelectedPage() - 1))
@@ -209,9 +209,12 @@ local function saveSlot()
 end
 local function UiModeChanged(data)
     if  data.newMode then
-      if pickSlotMode then
+      if pickSlotMode and not settings:get("persistMode") then
         pickSlotMode = false
         enableHotbar = false
+        drawHotbar()
+      elseif settings:get("persistMode") then
+        enableHotbar = true
         drawHotbar()
       end
     end
@@ -226,6 +229,12 @@ return {
         UiModeChanged = UiModeChanged,
     },
     engineHandlers = {
+        onLoad = function ()
+            if settings:get("persistMode") then
+                enableHotbar = true
+                drawHotbar()
+              end
+        end,
         onControllerButtonPress = function(btn)
             if core.isWorldPaused() and not pickSlotMode then
                 return

@@ -6,7 +6,10 @@ local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
 local util = require('openmw.util')
 local async = require('openmw.async')
+local storage = require('openmw.storage')
 local I = require('openmw.interfaces')
+
+local settings = storage.playerSection("SettingsQuickSelect")
 
 local utility = require("scripts.QuickSelect.qs_utility")
 local storedItems
@@ -31,8 +34,7 @@ local function saveStoredItemData(id, slot)
     storedItems[slot].spellType = nil
     storedItems[slot].enchantId = nil
     storedItems[slot].itemId    = nil
-    storedItems[slot].item = id
-
+    storedItems[slot].item      = id
 end
 local function saveStoredSpellData(spellId, spellType, slot)
     getFavoriteItems()
@@ -40,7 +42,7 @@ local function saveStoredSpellData(spellId, spellType, slot)
     storedItems[slot].spellType = nil
     storedItems[slot].enchantId = nil
     storedItems[slot].itemId    = nil
-    storedItems[slot].item    = nil
+    storedItems[slot].item      = nil
     storedItems[slot].spellType = spellType
     storedItems[slot].spell     = spellId
 end
@@ -50,7 +52,7 @@ local function saveStoredEnchantData(enchantId, itemId, slot)
     storedItems[slot].spellType = nil
     storedItems[slot].enchantId = nil
     storedItems[slot].itemId    = nil
-    storedItems[slot].item    = nil
+    storedItems[slot].item      = nil
     storedItems[slot].spellType = "Enchant"
     storedItems[slot].enchantId = enchantId
     storedItems[slot].itemId    = itemId
@@ -88,6 +90,16 @@ local function isSlotEquipped(slot)
     end
     return false
 end
+local function getEquipped(item)
+    local equip = types.Actor.equipment(self)
+    for index, value in pairs(equip) do
+        if value == item then
+            
+            return index
+        end
+    end
+    return nil
+end
 local function equipSlot(slot)
     local item = getFavoriteItemData(slot)
     if item then
@@ -113,23 +125,23 @@ local function equipSlot(slot)
         elseif item.item then
             local realItem = types.Actor.inventory(self):find(item.item)
             if not realItem then return end
-            core.sendGlobalEvent('UseItem', { object = realItem, actor = self })
+            local equipped = getEquipped(realItem)
+            if not equipped then
+                core.sendGlobalEvent('UseItem', { object = realItem, actor = self })
 
-            if realItem.type == types.Weapon or realItem.type == types.Lockpick or realItem.type == types.Probe then
-                async:newUnsavableSimulationTimer(0.1, function()
-                    if types.Actor.getStance(self) ~= types.Actor.STANCE.Weapon then
-                        types.Actor.setStance(self, types.Actor.STANCE.Weapon)
-                    end
-                end)
-            end
-            --[[
-            local slot = utility.findSlot(realItem)
-            local equip = types.Actor.equipment(self)
-            if slot then
-                equip[slot] = realItem
+                if realItem.type == types.Weapon or realItem.type == types.Lockpick or realItem.type == types.Probe then
+                    async:newUnsavableSimulationTimer(0.1, function()
+                        if types.Actor.getStance(self) ~= types.Actor.STANCE.Weapon then
+                            types.Actor.setStance(self, types.Actor.STANCE.Weapon)
+                        end
+                    end)
+                end
+            elseif settings:get("unEquipOnHotkey") then
+                local equip = types.Actor.equipment(self)
+                equip[equipped] = nil
+
                 types.Actor.setEquipment(self, equip)
             end
-            --]]
         end
     end
 
