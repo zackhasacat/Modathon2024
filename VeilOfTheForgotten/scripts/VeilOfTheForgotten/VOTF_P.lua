@@ -161,7 +161,7 @@ local function onFrame(dt)
     elseif not drawing and wasDrawing then
         local weapon = getEquipment(self)[types.Actor.EQUIPMENT_SLOT.CarriedRight]
         if not weapon then
-            error("No weapon equipped")
+           return
         end
         if weapon.recordId == "zhac_ball_01" then
             findVictim(false,weapon.recordId)
@@ -180,5 +180,11 @@ return {
     },
     engineHandlers = {
         onFrame = onFrame,
+    },
+    eventHandlers = {
+        openCompShare = function (actor)
+            I.UI.setMode(I.UI.MODE.Companion, { target = actor })
+        end,
+        returnPendingActor = returnPendingActor,
     }
 }

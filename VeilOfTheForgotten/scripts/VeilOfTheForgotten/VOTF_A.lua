@@ -9,6 +9,8 @@ local isPendingCapture = false
 local expireDt = 0
 local isPawn = false
 local settings = require("scripts.VeilOfTheForgotten.settings")
+local frozen = false
+local anim = require('openmw.animation')
 local function isCaptured()
     return types.Actor.activeSpells(self):isSpellActive("zhac_soulcapture_shock")
 end
@@ -27,6 +29,11 @@ local function onRelease()
         I.AI.startPackage({type = "Follow", target = nearby.players[1]})
     end)
 end
+local function makeIntoDoll()
+    self:enableAI(false)
+    onRelease()
+    frozen = true
+end
 local function checkForCapture()
     isPendingCapture = true
     expireDt = core.getSimulationTime() + 10
@@ -44,12 +51,29 @@ local function onUpdate(dt)
             isPendingCapture = false
         end
     end
+    if frozen then
+        anim.skipAnimationThisFrame(self)
+    end
 end
 return {
     eventHandlers = {
         checkForCapture = checkForCapture,
         onRelease = onRelease,
+        makeIntoDoll = makeIntoDoll,
     },
     engineHandlers = {
-        onUpdate = onUpdate }
+        onUpdate = onUpdate,
+        onSave = function ()
+            return  {
+                isPawn = isPawn,
+                frozen = frozen,
+            }
+        end,
+        onLoad = function (data)
+            if data then
+                isPawn = data.isPawn
+                frozen = data.frozen
+            end
+        end
+    }
 }
