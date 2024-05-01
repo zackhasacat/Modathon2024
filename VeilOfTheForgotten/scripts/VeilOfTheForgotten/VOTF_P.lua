@@ -1,20 +1,34 @@
 -- OpenMW Lua Script: Terminal Interface
 local core = require("openmw.core")
-
+local I = require('openmw.interfaces')
+if core.API_REVISION < 59 then
+    I.Settings.registerPage {
+        key = "SettingsVOTF",
+        l10n = "SettingsVOTF",
+        name = "Veil of the Forgotten",
+        description = "Your OpenMW version is out of date. Please download a version of 0.49 from April 2024 or newer."
+    }
+    return {}
+end
 local self = require("openmw.self")
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
 local util = require('openmw.util')
 local ui = require('openmw.ui')
-local I = require('openmw.interfaces')
 local ambient = require('openmw.ambient')
 local rotOffset = 0
 local rotOffset2 = 0
 local compatMode = core.API_REVISION == 29
 
 local settings = require("scripts.VeilOfTheForgotten.settings")
-
+local function getMyBall(actorId)
+    if actorId == "tr_m2_darvon golaren" then
+        return "zhac_ball_02"
+    else
+        return "zhac_ball_01"
+    end
+end
 I.Settings.registerPage {
     key = "SettingsVOTF",
     l10n = "SettingsVOTF",
@@ -104,7 +118,7 @@ local function findVictim(release, weapon)
     local navMeshPosition = nearby.findNearestNavMeshPosition(cast.hitPos)
     if not navMeshPosition and weapon then
         core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-     --   ui.showMessage("Your globe has been returned to you.")
+        --   ui.showMessage("Your globe has been returned to you.")
         return
     end
     local dist
@@ -113,13 +127,13 @@ local function findVictim(release, weapon)
         print(dist)
         if dist > 200 then
             core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-           -- ui.showMessage("Your globe has been returned to you.")
+            -- ui.showMessage("Your globe has been returned to you.")
             return
         end
-        local path = nearby.findPath(self.position, navMeshPosition,{includeFlags = nearby.NAVIGATOR_FLAGS.Walk})
+        local path = nearby.findPath(self.position, navMeshPosition, { includeFlags = nearby.NAVIGATOR_FLAGS.Walk })
         if path ~= nearby.FIND_PATH_STATUS.Success then
             core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-          --  ui.showMessage("Your globe has been returned to you.")
+            --  ui.showMessage("Your globe has been returned to you.")
             return
         end
     end
@@ -130,14 +144,20 @@ local function findVictim(release, weapon)
         return
     end
     if cast.hitObject and (cast.hitObject.type == types.NPC or cast.hitObject.type == types.Creature) then
-        local healthPercent = types.Actor.stats.dynamic.health(cast.hitObject).current / types.Actor.stats.dynamic.health(cast.hitObject).base * 100
+        local healthPercent = types.Actor.stats.dynamic.health(cast.hitObject).current /
+        types.Actor.stats.dynamic.health(cast.hitObject).base * 100
         local threshold = settings.getHealthCaptureThreshold()
+        if weapon == "zhac_ball_02" and cast.hitObject.recordId ~= "tr_m2_darvon golaren" then
+            ui.showMessage("This globe is not attuned to this person.")
+            core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
+            return
+        end
         if healthPercent > threshold then
             ui.showMessage("You must weaken this target before they may be captured.")
             core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
             return
         end
-      --  ui.showMessage("Hitting " .. cast.hitObject.type.record(cast.hitObject).name)
+        --  ui.showMessage("Hitting " .. cast.hitObject.type.record(cast.hitObject).name)
         cast.hitObject:sendEvent("checkForCapture")
         return
     else
@@ -161,13 +181,15 @@ local function onFrame(dt)
     elseif not drawing and wasDrawing then
         local weapon = getEquipment(self)[types.Actor.EQUIPMENT_SLOT.CarriedRight]
         if not weapon then
-           return
+            return
         end
-        if weapon.recordId == "zhac_ball_01" then
-            findVictim(false,weapon.recordId)
+        if weapon.recordId == "zhac_ball_01" or weapon.recordId == "zhac_ball_02" then
+            findVictim(false, weapon.recordId)
+            print("capture")
         else
             print(weapon.recordId)
             findVictim(true, weapon.recordId)
+            print("release")
         end
         wasDrawing = false
     end
@@ -182,7 +204,7 @@ return {
         onFrame = onFrame,
     },
     eventHandlers = {
-        openCompShare = function (actor)
+        openCompShare = function(actor)
             I.UI.setMode(I.UI.MODE.Companion, { target = actor })
         end,
         returnPendingActor = returnPendingActor,
