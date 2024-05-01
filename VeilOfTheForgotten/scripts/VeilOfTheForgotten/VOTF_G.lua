@@ -7,6 +7,7 @@ local async = require("openmw.async")
 local core = require("openmw.core")
 
 local calendar = require('openmw_aux.calendar')
+local settings = require("scripts.VeilOfTheForgotten.settings")
 
 local storedActors = {}
 local controlledActors = {}
@@ -14,7 +15,7 @@ local controlledActors = {}
 local function captureComplete(actor)
     local name = actor.type.records[actor.recordId].name
     local oldRecord = types.Weapon.records["zhac_ball_01"]
-    local newRecordDraft = types.Weapon.createRecordDraft({template =oldRecord, name = oldRecord.name  .. "(" .. name .. ")"})
+    local newRecordDraft = types.Weapon.createRecordDraft({template =oldRecord, name = oldRecord.name  .. " (" .. name .. ")"})
     local newRecord = world.createRecord(newRecordDraft)
     local newItem = world.createObject(newRecord.id)
     storedActors[newRecord.id] = actor.id

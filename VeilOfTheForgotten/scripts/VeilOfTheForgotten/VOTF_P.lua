@@ -7,12 +7,20 @@ local nearby = require('openmw.nearby')
 local camera = require('openmw.camera')
 local util = require('openmw.util')
 local ui = require('openmw.ui')
+local I = require('openmw.interfaces')
 local ambient = require('openmw.ambient')
 local rotOffset = 0
 local rotOffset2 = 0
 local compatMode = core.API_REVISION == 29
 
+local settings = require("scripts.VeilOfTheForgotten.settings")
 
+I.Settings.registerPage {
+    key = "SettingsVOTF",
+    l10n = "SettingsVOTF",
+    name = "Veil of the Forgotten",
+    description = "These settings allow you to modify the behavior of Veil of the Forgotten."
+}
 local function anglesToV(pitch, yaw)
     local xzLen = math.cos(pitch)
     return util.vector3(xzLen * math.sin(yaw), -- x
@@ -86,16 +94,17 @@ local function findVictim(release, weapon)
         print("no hit")
         --give the item back
         core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-        ui.showMessage("Your globe has been returned to you.")
+        --ui.showMessage("Your globe has been returned to you.")
         return
     elseif not release and not cast.hitPos then
+        core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
         return
     end
 
     local navMeshPosition = nearby.findNearestNavMeshPosition(cast.hitPos)
     if not navMeshPosition and weapon then
         core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-        ui.showMessage("Your globe has been returned to you.")
+     --   ui.showMessage("Your globe has been returned to you.")
         return
     end
     local dist
@@ -104,13 +113,13 @@ local function findVictim(release, weapon)
         print(dist)
         if dist > 200 then
             core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-            ui.showMessage("Your globe has been returned to you.")
+           -- ui.showMessage("Your globe has been returned to you.")
             return
         end
         local path = nearby.findPath(self.position, navMeshPosition,{includeFlags = nearby.NAVIGATOR_FLAGS.Walk})
         if path ~= nearby.FIND_PATH_STATUS.Success then
             core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
-            ui.showMessage("Your globe has been returned to you.")
+          --  ui.showMessage("Your globe has been returned to you.")
             return
         end
     end
@@ -121,14 +130,24 @@ local function findVictim(release, weapon)
         return
     end
     if cast.hitObject and (cast.hitObject.type == types.NPC or cast.hitObject.type == types.Creature) then
-        ui.showMessage("Hitting " .. cast.hitObject.type.record(cast.hitObject).name)
+        local healthPercent = types.Actor.stats.dynamic.health(cast.hitObject).current / types.Actor.stats.dynamic.health(cast.hitObject).base * 100
+        local threshold = settings.getHealthCaptureThreshold()
+        if healthPercent > threshold then
+            ui.showMessage("You must weaken this target before they may be captured.")
+            core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
+            return
+        end
+      --  ui.showMessage("Hitting " .. cast.hitObject.type.record(cast.hitObject).name)
         cast.hitObject:sendEvent("checkForCapture")
+        return
+    else
+        core.sendGlobalEvent("returnItem", { itemId = weapon, actor = self })
         return
     end
 end
 local function onFrame(dt)
     local drawing = self.controls.use == 1
-    if pendingReturnWeapon and ambient.isSoundPlaying("destruction area") then
+    if pendingReturnWeapon and ambient.isSoundPlaying("mysticism area") then
         returnDelay = 0
     elseif pendingReturnWeapon and returnDelay > 0 then
         returnDelay = returnDelay - dt
@@ -145,7 +164,7 @@ local function onFrame(dt)
             error("No weapon equipped")
         end
         if weapon.recordId == "zhac_ball_01" then
-            findVictim()
+            findVictim(false,weapon.recordId)
         else
             print(weapon.recordId)
             findVictim(true, weapon.recordId)

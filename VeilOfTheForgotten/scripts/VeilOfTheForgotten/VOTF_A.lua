@@ -3,10 +3,12 @@ local self = require("openmw.self")
 local core = require("openmw.core")
 local types = require("openmw.types")
 local async = require("openmw.async")
+local nearby = require("openmw.nearby")
 local guideState = nil
 local isPendingCapture = false
 local expireDt = 0
 local isPawn = false
+local settings = require("scripts.VeilOfTheForgotten.settings")
 local function isCaptured()
     return types.Actor.activeSpells(self):isSpellActive("zhac_soulcapture_shock")
 end
@@ -22,6 +24,7 @@ local function onRelease()
         types.Actor.stats.ai.alarm(self).base = 0
         I.AI.removePackages()
         types.Actor.setStance(self,types.Actor.STANCE.Nothing)
+        I.AI.startPackage({type = "Follow", target = nearby.players[1]})
     end)
 end
 local function checkForCapture()
