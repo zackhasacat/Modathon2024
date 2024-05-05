@@ -13,13 +13,13 @@ local marker2X, marker2Y
 
 local function createPortalAt(data)
     local id = data.id
-    local cell = data.cell
+    local xcell = data.cell
     local position = data.position
     local x, y = data.x, data.y
     local markerObj
 
     if id == 1 and not marker1Cell then
-        marker1Cell = cell
+        marker1Cell = xcell
         markerObj = world.createObject("zhac_portalmarker_1")
         marker1Pos = position
         marker1X = x
@@ -38,11 +38,11 @@ local function createPortalAt(data)
             end
         end
         marker1Pos = position
-        marker1Cell = cell
+        marker1Cell = xcell
         marker1X = x
         marker1Y = y
     elseif id == 2 and not marker2Cell then
-        marker2Cell = cell
+        marker2Cell = xcell
         markerObj = world.createObject("zhac_portalmarker_2")
         marker2Pos = position
         marker2X = x
@@ -61,11 +61,11 @@ local function createPortalAt(data)
             end
         end
         marker2Pos = position
-        marker2Cell = cell
+        marker2Cell = xcell
         marker2X = x
         marker2Y = y
     end
-    markerObj:teleport(cell, position)
+    markerObj:teleport(xcell, position)
     markerObj:setScale(0.00001)
 end
 
