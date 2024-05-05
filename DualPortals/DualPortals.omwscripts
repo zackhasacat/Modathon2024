@@ -1,0 +1,4 @@
+PLAYER:scripts/DualPortals/portal_p.lua
+PLAYER:scripts/DualPortals/portal_p2.lua
+ACTIVATOR:scripts/DualPortals/portal_acti.lua
+GLOBAL:scripts/DualPortals/portal_g.lua
