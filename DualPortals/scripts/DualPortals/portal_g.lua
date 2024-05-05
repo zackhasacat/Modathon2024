@@ -77,7 +77,7 @@ local function tpToPortal(state)
         end
 
         if cell then
-            world.players[1]:teleport(cell, marker1Pos + util.vector3(0, 0, 100), { onGround = true })
+            world.players[1]:teleport(cell, marker2Pos + util.vector3(0, 0, 100), { onGround = true })
         else
             return
         end
