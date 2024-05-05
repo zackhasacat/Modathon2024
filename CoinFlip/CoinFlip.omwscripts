@@ -1,1 +1,2 @@
 GLOBAL:scripts/coinflip/coinflip_g.lua
+PLAYER:scripts/coinflip/coinflip_p.lua

@@ -113,14 +113,16 @@ return {
             }
         end,
         onLoad = function(data)
-            marker1Cell = data.marker1Cell
-            marker1Pos = data.marker1Pos
-            marker2Cell = data.marker2Cell
-            marker2Pos = data.marker2Pos
-            marker1X = data.marker1X
-            marker1Y = data.marker1Y
-            marker2X = data.marker2X
-            marker2Y = data.marker2Y
+            if data then
+                marker1Cell = data.marker1Cell
+                marker1Pos = data.marker1Pos
+                marker2Cell = data.marker2Cell
+                marker2Pos = data.marker2Pos
+                marker1X = data.marker1X
+                marker1Y = data.marker1Y
+                marker2X = data.marker2X
+                marker2Y = data.marker2Y
+            end
         end
     }
 }

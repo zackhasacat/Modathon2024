@@ -4,10 +4,17 @@ local _, util = pcall(require, "openmw.util")
 local _, core = pcall(require, "openmw.core")
 local _, types = pcall(require, "openmw.types")
 local _, storage = pcall(require, "openmw.storage")
-local _, world = pcall(require, "openmw.world")
+local world = pcall(require, "openmw.world")
 local _, async = pcall(require, "openmw.async")
 
-local constant = require("scripts.CoinFlip.constant")
+local constant 
+
+if isOpenMW then
+    constant = require("scripts.CoinFlip.constant")
+else
+    constant = require("CoinFlip.constant")
+
+end
 local timeDelay = 0.01
 local useMountMenu = true
 local coinObj
@@ -31,13 +38,6 @@ local function getItemRecordId(obj)
         return obj.baseObject.id:lower()
     end
 end
-local function showPlayerMessage(msg)
-    if isOpenMW then
-        world.players[1]:sendEvent("CF_ShowMessage", msg)
-    else
-        tes3.messageBox(msg)
-    end
-end
 local function gameIsPaused()
     if isOpenMW then
     else
@@ -50,13 +50,6 @@ local function runWithDelay(delay, func)
     else
         timer.start({ duration = delay, callback = func })
     end
-end
-local function getPlayerLuck()
-
-    if isOpenMW then
-        return types.Actor.stats.attributes.luck(world.players[1]).modified
-    end
-    
 end
 local function getRotation(x, y, z)
     --TODO: account for z rotation so it faces the player still
@@ -76,7 +69,7 @@ local function teleportObject(object, cell, position, rotation)
 end
 local function randomBool()
 
-    if math.random() < getPlayerLuck() * 0.01 then
+    if math.random() < 0.5 then
         return true
     else
         return false
@@ -108,9 +101,6 @@ local function teleportCoin()
         if randomBool() then
             newRot = getRotation(0, math.rad(180), 0)
             newZPos = coinOriginZPos + 0.1111
-            showPlayerMessage("Heads, you are lucky!")
-        else
-            showPlayerMessage("Tails, you are not lucky!")
         end
     end
     teleportObject(coinObj, coinObj.cell, getPosition(coinObj.position.x, coinObj.position.y, newZPos), newRot)
