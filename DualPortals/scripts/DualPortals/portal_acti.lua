@@ -45,7 +45,7 @@ local function onUpdate(dt)
             delay = 0
             core.vfx.spawn("VFX_MysticismArea", pos, { scale = 15 })
             if state == 1 then
-                core.vfx.spawn("VFX_IllusionArea", pos, { scale = 15 })
+                core.vfx.spawn("portal1", pos, { scale = 15 })
             else
                 core.vfx.spawn("VFX_DestructArea", pos, { scale = 15 })
             end

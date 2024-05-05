@@ -1,0 +1,4 @@
+PLAYER:scripts/spidertron/spidertron_p.lua
+PLAYER:scripts/spidertron/spidertron_system.lua
+PLAYER:scripts/spidertron/spidertron_controls.lua
+GLOBAL:scripts/spidertron/spidertron_g.lua

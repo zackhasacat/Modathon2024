@@ -77,6 +77,23 @@ local function getObjInCrosshairs(ignoreOb, mdist, alwaysPost, sourcePos)
     if (mdist ~= nil) then dist = mdist end
 
     local ret = nearby.castRay(pos, pos + v * dist, { ignore = self })
+    local retGround = nearby.castRay(pos, pos + v * dist, { collisionType = nearby.COLLISION_TYPE.HeightMap })
+    local hitDist1
+    if ret.hitPos then
+        hitDist1 = (ret.hitPos - pos):length()
+    
+    end 
+    local hitDist2
+    
+    if ret.hitPos then
+        hitDist2 = (retGround.hitPos - pos):length()
+    
+    end  
+    if hitDist1 and hitDist2 then
+        if hitDist1 > hitDist2 then
+            ret = retGround
+        end
+    end
     local destPos = (pos + v * dist)
 
     return ret

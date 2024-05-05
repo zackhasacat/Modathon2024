@@ -1,1 +1,1 @@
-require("scripts.CoinFlip.CoinFlip_g")
+require("CoinFlip.CoinFlip_g")

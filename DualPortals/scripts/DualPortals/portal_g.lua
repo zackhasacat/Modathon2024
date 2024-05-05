@@ -4,10 +4,12 @@ local util = require("openmw.util")
 local marker1Cell
 local marker1Pos
 local marker1X, marker1Y
+local marker1Obj
 
 local marker2Cell
 local marker2Pos
 local marker2X, marker2Y
+local marker2Obj
 
 
 
@@ -17,13 +19,15 @@ local function createPortalAt(data)
     local position = data.position
     local x, y = data.x, data.y
     local markerObj
-
     if id == 1 and not marker1Cell then
         marker1Cell = xcell
-        markerObj = world.createObject("zhac_portalmarker_1")
+        marker1Obj = world.createObject("zhac_portalmarker_1")
         marker1Pos = position
         marker1X = x
         marker1Y = y
+        markerObj = marker1Obj
+    elseif id == 1 and marker1Obj then
+        markerObj = marker1Obj
     elseif id == 1 and marker1Cell then
         local cell
         if not marker1X then
@@ -43,10 +47,13 @@ local function createPortalAt(data)
         marker1Y = y
     elseif id == 2 and not marker2Cell then
         marker2Cell = xcell
-        markerObj = world.createObject("zhac_portalmarker_2")
+        marker2Obj = world.createObject("zhac_portalmarker_2")
         marker2Pos = position
         marker2X = x
         marker2Y = y
+        markerObj = marker2Obj
+    elseif id == 2 and marker2Obj then
+        markerObj = marker2Obj
     elseif id == 2 and marker2Cell then
         local cell
         if not marker2X then
@@ -71,6 +78,14 @@ end
 
 local function tpToPortal(state)
     if state == 1 then
+        if marker2Obj then
+            world.players[1]:sendEvent("playTeleportSound")
+            world.players[1]:teleport(marker2Obj.cell, marker2Obj.position + util.vector3(0, 0, 100), { onGround = true })
+            return
+        else
+            print("no marker 2")
+            return
+        end
         local cell = marker2Cell
         if marker2X then
             cell = world.getExteriorCell(marker2X, marker2Y)
@@ -82,6 +97,15 @@ local function tpToPortal(state)
             return
         end
     else
+        if marker1Obj then
+            world.players[1]:sendEvent("playTeleportSound")
+            world.players[1]:teleport(marker1Obj.cell, marker1Obj.position + util.vector3(0, 0, 100), { onGround = true })
+            return
+        else
+            print("no marker 1")
+            return
+        end
+        print(state)
         local cell = marker1Cell
         if marker1X then
             cell = world.getExteriorCell(marker1X, marker1Y)
@@ -92,7 +116,6 @@ local function tpToPortal(state)
             return
         end
     end
-    world.players[1]:sendEvent("playTeleportSound")
 end
 return {
     eventHandlers = {
@@ -109,7 +132,9 @@ return {
                 marker1X = marker1X,
                 marker1Y = marker1Y,
                 marker2X = marker2X,
-                marker2Y = marker2Y
+                marker2Y = marker2Y,
+                marker2Obj = marker2Obj,
+                marker1Obj = marker1Obj
             }
         end,
         onLoad = function(data)
@@ -122,6 +147,8 @@ return {
                 marker1Y = data.marker1Y
                 marker2X = data.marker2X
                 marker2Y = data.marker2Y
+                marker1Obj = data.marker1Obj
+                marker2Obj = data.marker2Obj
             end
         end
     }
