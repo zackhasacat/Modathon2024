@@ -8,7 +8,7 @@ local _, world = pcall(require, "openmw.world")
 local _, async = pcall(require, "openmw.async")
 local constant
 if isOpenMW then
- constant = require("scripts.CoinFlip.constant")
+    constant = require("mwse.mods.CoinFlip.constant")
 else
     constant = require("CoinFlip.constant")
 end
@@ -18,15 +18,47 @@ local coinObj
 local coinDistance = 0
 local coinRot = 0
 local coinAscent = true
+local waitForPickup = false
 local coinOriginZPos
 local player
+local data = {}
 math.randomseed(os.time())
+
+if core and core.API_REVISION < 55 then
+    I.Settings.registerPage {
+        key = "SettingsCoinFlip",
+        l10n = "SettingsTLF",
+        name = "The Lucky Fellow",
+        description = "Your OpenMW version is out of date. Please download a version of 0.49 from April 2024 or newer."
+    }
+    return {}
+end
 
 local function getPosition(x, y, z)
     if isOpenMW then
         return util.vector3(x, y, z)
     else
         return tes3vector3.new(x, y, z)
+    end
+end
+local function getValue(id)
+    if isOpenMW then
+        return data[id]
+    else
+        if not tes3.player.data.coinFlip then
+            tes3.player.data.coinFlip = {}
+        end
+        return tes3.player.data.coinFlip[id]
+    end
+end
+local function setValue(id,value)
+    if isOpenMW then
+         data[id] = value
+    else
+        if not tes3.player.data.coinFlip then
+            tes3.player.data.coinFlip = {}
+        end
+         tes3.player.data.coinFlip[id] = value
     end
 end
 local function getItemRecordId(obj)
@@ -36,6 +68,13 @@ local function getItemRecordId(obj)
         return obj.baseObject.id:lower()
     end
 end
+local function playSound(id)
+    if isOpenMW then
+        player:sendEvent("CF_PlaySound")
+    else
+        tes3.playSound({ sound = id })
+    end
+end
 local function showPlayerMessage(msg)
     if isOpenMW then
         player:sendEvent("CF_ShowMessage", msg)
@@ -43,10 +82,73 @@ local function showPlayerMessage(msg)
         tes3.messageBox(msg)
     end
 end
+local function moveIntoInv(item)
+    if isOpenMW then
+        playSound("item misc up")
+        item:moveInto(player)
+    else
+        local id = item.object.id
+
+        item:delete()
+        tes3.addItem({ reference = tes3.player, item = id, count = 1 })
+    end
+end
 local function gameIsPaused()
     if isOpenMW then
     else
         return tes3.menuMode()
+    end
+end
+local function addSpellEffects(id)
+    if isOpenMW then
+        --play sound
+        types.Actor.activeSpells(player):add({ id = id, effects = { 0 }, ignoreResistances = true, ignoreSpellAbsorption = true, ignoreReflect = true, stackable = true, })
+    else
+        tes3.applyMagicSource { reference = tes3.player, source = id, bypassResistances = true }
+    end
+end
+local function addUnluckyEffects(id)
+    playSound("destruction hit")
+    if isOpenMW then
+        addSpellEffects("zhac_spell_unlucky")
+    else
+        local timescale = tes3.worldController.timescale.value
+        tes3.applyMagicSource({
+            reference = tes3.player,
+            bypassResistances = true,
+            name = constant.unluckySpellName,
+            effects = {
+                {
+                    id = tes3.effect["drainAttribute"],
+                    attribute = tes3.attribute.luck,
+                    min = constant.luckModifier,
+                    max = constant.luckModifier,
+                    duration = (24 / timescale) * 60 * 60,
+                },
+            },
+        })
+    end
+end
+local function addLuckyEffects(id)
+    playSound("restoration hit")
+    if isOpenMW then
+        addSpellEffects("zhac_spell_lucky")
+    else
+        local timescale = tes3.worldController.timescale.value
+        tes3.applyMagicSource({
+            reference = tes3.player,
+            bypassResistances = true,
+            name = constant.luckySpellName,
+            effects = {
+                {
+                    id = tes3.effect["fortifyAttribute"],
+                    attribute = tes3.attribute.luck,
+                    min = constant.luckModifier,
+                    max = constant.luckModifier,
+                    duration = (24 / timescale) * 60 * 60,
+                },
+            },
+        })
     end
 end
 local function runWithDelay(delay, func)
@@ -64,23 +166,13 @@ local function getPlayerLuck()
     end
 end
 local function coinFlipChance()
-    return 50--getPlayerLuck() * 0.01
-end
-local function teleportObjToPlayer(id)
-    print(id)
-    if isOpenMW then
-        local cell = world.getCellByName("zhac_coinholdingcell")
-        for index, obj in ipairs(cell:getAll()) do
-            print(obj.recordId, id)
-            if obj.recordId == id then
-                obj:teleport(player.cell, player.position)
-                return
-            end
-        end
-    else
-       local reference = tes3.getReference(id)
-        tes3.positionCell({ reference = reference, cell = tes3.mobilePlayer.cell, position = tes3.mobilePlayer.position })
+    local val = getValue("coinFlipChance")
+    if not val then
+         val = constant.startingChance
     end
+    setValue("coinFlipChance", val - constant.chanceIncrement)
+    print("chance is " .. tostring(val))
+    return val --getPlayerLuck() * 0.01
 end
 local function getRotation(x, y, z)
     --TODO: account for z rotation so it faces the player still
@@ -100,7 +192,6 @@ local function teleportObject(object, cell, position, rotation)
 end
 local function randomBool()
     if math.random() < coinFlipChance() * 0.01 then
-        
         return true
     else
         return false
@@ -132,14 +223,26 @@ local function teleportCoin()
         if randomBool() then
             newRot = getRotation(0, math.rad(180), 0)
             --newZPos = coinOriginZPos + 0.1111
-            showPlayerMessage("Heads, you are lucky!")
-            print("123")
-            teleportObjToPlayer("zhac_caster_lucky")
+            --showPlayerMessage("Heads, you are lucky!")
+            addLuckyEffects()
+            waitForPickup = true
+            runWithDelay(constant.pickUpDelay, function()
+                if waitForPickup then
+                moveIntoInv(coinObj)
+                waitForPickup = false
+                end
+            end)
         else
-            showPlayerMessage("Tails, you are not lucky!")
-            print("123")
-            teleportObjToPlayer("zhac_caster_unlucky")
+            addUnluckyEffects()
+            waitForPickup = true
+            runWithDelay(constant.pickUpDelay, function()
+                if waitForPickup then
+                moveIntoInv(coinObj)
+                waitForPickup = false
+                end
+            end)
         end
+        --return
     end
     teleportObject(coinObj, coinObj.cell, getPosition(coinObj.position.x, coinObj.position.y, newZPos), newRot)
 end
@@ -166,6 +269,9 @@ local function activateCoin(coin, player)
         return
     end
     if getItemRecordId(coin) == constant.coinId then
+        if waitForPickup then
+            waitForPickup = false
+        end
         coinOriginZPos = coin.position.z
         coinDistance = 0
         coinRot = 0
@@ -182,24 +288,28 @@ local function activateMWSE(e)
 end
 if isOpenMW then
     I.Activation.addHandlerForType(types.Miscellaneous, activateCoin)
-
 else
     event.register(tes3.event.activate, activateMWSE)
     return {
     }
 end
-print("isOpenMW")
 return {
     engineHandlers = {
         onPlayerAdded = function(p)
             player = p
+        end,
+        onSave = function ()
+            return {data = data}
+        end,
+        onLoad = function (data)
+            if data then
+                data = data.data
+            end
         end
-
     },
     eventHandlers = {
         CF_SetPlayer = function(plr)
             player = plr
         end,
-        CF_teleportObjToPlayer = teleportObjToPlayer
     }
 }
