@@ -9,6 +9,15 @@ local _, async = pcall(require, "openmw.async")
 local constant
 if isOpenMW then
     constant = require("mwse.mods.CoinFlip.constant")
+    if core and core.API_REVISION < 55 then
+        I.Settings.registerPage {
+            key = "SettingsCoinFlip",
+            l10n = "SettingsTLF",
+            name = "The Lucky Fellow",
+            description = "Your OpenMW version is out of date. Please download a version of 0.49 from April 2024 or newer."
+        }
+        return {}
+    end
 else
     constant = require("CoinFlip.constant")
 end
@@ -24,15 +33,6 @@ local player
 local data = {}
 math.randomseed(os.time())
 
-if core and core.API_REVISION < 55 then
-    I.Settings.registerPage {
-        key = "SettingsCoinFlip",
-        l10n = "SettingsTLF",
-        name = "The Lucky Fellow",
-        description = "Your OpenMW version is out of date. Please download a version of 0.49 from April 2024 or newer."
-    }
-    return {}
-end
 
 local function getPosition(x, y, z)
     if isOpenMW then
@@ -110,7 +110,7 @@ end
 local function addUnluckyEffects(id)
     playSound("destruction hit")
     if isOpenMW then
-        addSpellEffects("zhac_spell_unlucky")
+        addSpellEffects(constant.unLuckySpellId)
     else
         local timescale = tes3.worldController.timescale.value
         tes3.applyMagicSource({
@@ -123,7 +123,7 @@ local function addUnluckyEffects(id)
                     attribute = tes3.attribute.luck,
                     min = constant.luckModifier,
                     max = constant.luckModifier,
-                    duration = (24 / timescale) * 60 * 60,
+                    duration = (constant.hoursToApply / timescale) * 60 * 60,
                 },
             },
         })
@@ -132,7 +132,7 @@ end
 local function addLuckyEffects(id)
     playSound("restoration hit")
     if isOpenMW then
-        addSpellEffects("zhac_spell_lucky")
+        addSpellEffects(constant.luckySpellId)
     else
         local timescale = tes3.worldController.timescale.value
         tes3.applyMagicSource({
@@ -145,7 +145,7 @@ local function addLuckyEffects(id)
                     attribute = tes3.attribute.luck,
                     min = constant.luckModifier,
                     max = constant.luckModifier,
-                    duration = (24 / timescale) * 60 * 60,
+                    duration = (constant.hoursToApply / timescale) * 60 * 60,
                 },
             },
         })
