@@ -29,8 +29,10 @@ local function onConsume(potion)
     if morrowindDrinks[potion.recordId] then
         I.NeedsPlayer.relieveNeed("Thirst", morrowindDrinks[potion.recordId].saturation)
     elseif savedDrinks[potion.recordId] then
+        print("saved thirst for  " .. potion.recordId)
         I.NeedsPlayer.relieveNeed("Thirst", savedDrinks[potion.recordId].saturation)
-   
+    else
+        print("NO thirst for  " .. potion.recordId)
     end
 end
 local function addSavedDrink(data)

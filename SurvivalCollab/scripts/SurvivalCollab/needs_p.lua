@@ -11,17 +11,24 @@ local async = require("openmw.async")
 local input = require("openmw.input")
 local time = require('openmw_aux.time')
 local needBase = require("scripts.SurvivalCollab.need_base")
-
+local settingsSystem = require("scripts.SurvivalCollab.needs_settings")
 local needs
-
+local menuMode = false
 local function initNeeds()
     needs = {}
-    local hunger = needBase.newNeed("Hunger", 100, 0.01)
-    local thirst = needBase.newNeed("Thirst", 100, 0.05)
-    local energy = needBase.newNeed("Energy", 100, 0.04)
+    local hunger, hSett = needBase.newNeed("Hunger", 100, 0.01,"ZHAC_Needs_Hunger_famished","ZHAC_Needs_Hunger_nourished")
+    local thirst, tSett = needBase.newNeed("Thirst", 40, 0.05,"ZHAC_Needs_Thirst_thirsty","ZHAC_Needs_Thirst_quenched")
+    local energy, eSett = needBase.newNeed("Energy", 100, 0.04,"ZHAC_Needs_Sleep_Tired","ZHAC_Needs_Sleep_Rested")
     table.insert(needs, hunger)
     table.insert(needs, thirst)
     table.insert(needs, energy)
+    local settingList = {}
+    for index, need in ipairs(needs) do
+        for index, value in ipairs(need:getSettingItems()) do
+            table.insert(settingList, value)
+        end
+    end
+    settingsSystem.createNeedSection(settingList)
     I.NeedsPlayer_UI.updateElement()
 end
 local lastGameTime
@@ -43,18 +50,25 @@ local function onUpdate(dt)
         end
         lastGameTime = core.getGameTime()
         I.NeedsPlayer_UI.updateElement()
-        
     end
 end
 
-local function relieveNeed(name,amount)
+local function relieveNeed(name, amount)
     for index, need in ipairs(needs) do
         if need.name == name then
             need:relieve(amount)
             I.NeedsPlayer_UI.updateElement()
-            self:sendEvent("needRelieved", {name = name, amount = amount})
+            print("Relieved" .. tostring(amount))
+            self:sendEvent("needRelieved", { name = name, amount = amount })
             return
         end
+    end
+end
+local function UiModeChanged(data)
+    local newMenuModeState = not (data.newMode == nil)
+    if menuMode ~= newMenuModeState then
+        menuMode = newMenuModeState
+        I.NeedsPlayer_UI.updateElement(menuMode)
     end
 end
 return {
@@ -68,7 +82,7 @@ return {
                 end
             end
         end,
-        getNeeds = function ()
+        getNeeds = function()
             if not needs then
                 initNeeds()
             end
@@ -84,8 +98,15 @@ return {
                 needs = {}
                 for index, needD in ipairs(needData) do
                     local loadedNeed = needBase.load(needD)
-                    table.insert(needs,loadedNeed)
+                    table.insert(needs, loadedNeed)
                 end
+                local settingList = {}
+                for index, need in ipairs(needs) do
+                    for index, value in ipairs(need:getSettingItems()) do
+                        table.insert(settingList, value)
+                    end
+                end
+                settingsSystem.createNeedSection(settingList)
                 lastGameTime = data.lastGameTime
                 I.NeedsPlayer_UI.updateElement()
             end
@@ -93,15 +114,13 @@ return {
         onSave = function()
             local needsSaved = {}
             for index, need in ipairs(needs) do
-                table.insert(needsSaved,need:save())
+                table.insert(needsSaved, need:save())
             end
             return { needs = needsSaved, lastGameTime = lastGameTime }
         end,
         onUpdate = onUpdate,
     },
     eventHandlers = {
-        getRoomNavPos1 = getRoomNavPos1,
-        ZS_ShowMessage = ZS_ShowMessage,
-        InRoomCheck = InRoomCheck,
+        UiModeChanged = UiModeChanged,
     }
 }

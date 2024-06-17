@@ -11,7 +11,7 @@ local bit8 = 255
 local statColors = {
     hunger = util.color.rgb(255 / bit8, 165 / bit8, 0 / bit8),     -- Orange for hunger
     thirst = util.color.rgb(0 / bit8, 121 / bit8, 255 / bit8),    -- Blue for thirst
-    energy = util.color.rgb(25 / bit8, 25 / bit8, 112 / bit8),    -- Dark blue for sleep/energy
+    energy = util.color.rgb(255 / bit8, 0 / bit8, 0 / bit8),    -- Dark blue for sleep/energy
 }
 local statTexture = ui.texture({ path = 'textures/menu_bar_gray.dds' })
 local statSize = util.vector2(65, 13)

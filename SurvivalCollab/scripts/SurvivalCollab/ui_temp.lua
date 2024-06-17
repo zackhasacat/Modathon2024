@@ -66,9 +66,14 @@ local function textContent(text, template, color)
         }
     }
 end
-local function updateElement()
+local onlyWhenPaused = false
+local function updateElement(inMenuMode)
     if element then
         element:destroy()
+    end
+    if onlyWhenPaused and not inMenuMode then
+        element = nil
+        return
     end
     local content = {}
     local lines = textToShow()
